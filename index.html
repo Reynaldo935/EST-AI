@@ -1,0 +1,2046 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Laboratorio de Estadística · Uso de IA y Rendimiento Académico</title>
+<style>
+  *,*::before,*::after{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;
+    font-family:'Segoe UI',Roboto,system-ui,-apple-system,sans-serif;
+    background:#F8FAFC;color:#263238;line-height:1.55;font-size:15px;
+  }
+  header.hero{background:#245B70;color:#fff;padding:1.5rem 1.1rem 1.3rem}
+  header.hero h1{margin:0;font-size:1.22rem;letter-spacing:.2px;line-height:1.35}
+  header.hero p{margin:.4rem 0 0;font-size:.84rem;color:#CFE3EA;max-width:820px}
+  header.hero .tag{display:inline-block;background:#F2C66D;color:#263238;font-size:.7rem;font-weight:700;
+    padding:.18rem .55rem;border-radius:99px;margin-top:.6rem;letter-spacing:.3px}
+
+  nav{position:sticky;top:0;z-index:60;background:#fff;border-bottom:1px solid #E2E8F0;
+      box-shadow:0 2px 10px rgba(36,91,112,.07)}
+  .nav-inner{max-width:1200px;margin:0 auto;padding:.45rem .7rem}
+  .nav-links{display:flex;gap:.28rem;flex-wrap:wrap;list-style:none;margin:0;padding:0}
+  .nav-links button{
+    background:transparent;border:1px solid transparent;color:#245B70;
+    padding:.42rem .68rem;border-radius:8px;cursor:pointer;font-size:.79rem;font-weight:600;
+    font-family:inherit;transition:background .15s,color .15s;
+  }
+  .nav-links button:hover{background:#EAF1F4}
+  .nav-links button.active{background:#245B70;color:#fff}
+
+  main{max-width:1200px;margin:0 auto;padding:1.1rem .85rem 3.5rem}
+  section{display:none}
+  section.active{display:block;animation:fade .22s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+
+  h2{color:#245B70;font-size:1.12rem;margin:.1rem 0 .85rem;padding-left:.6rem;
+     border-left:4px solid #6B9B83;line-height:1.3}
+  h3{color:#245B70;font-size:.97rem;margin:1.1rem 0 .5rem}
+  h4{color:#245B70;font-size:.88rem;margin:.8rem 0 .35rem}
+  p{margin:.45rem 0}
+
+  .card{background:#fff;border:1px solid #E2E8F0;border-radius:14px;padding:1rem;
+        margin-bottom:1rem;box-shadow:0 1px 3px rgba(36,91,112,.05)}
+  .card.tight{padding:.8rem}
+  .grid{display:grid;gap:.85rem;grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
+  .grid2{display:grid;gap:.85rem;grid-template-columns:repeat(auto-fit,minmax(320px,1fr))}
+
+  .kpi{background:#fff;border:1px solid #E2E8F0;border-radius:12px;padding:.85rem;text-align:center}
+  .kpi .val{font-size:1.45rem;font-weight:700;color:#245B70;line-height:1.2}
+  .kpi .lbl{font-size:.74rem;color:#64748B;margin-top:.2rem;text-transform:uppercase;letter-spacing:.4px}
+
+  .table-wrap{overflow-x:auto;border-radius:10px;border:1px solid #E2E8F0}
+  table{width:100%;border-collapse:collapse;font-size:.82rem;background:#fff}
+  th{background:#245B70;color:#fff;padding:.5rem .55rem;text-align:left;font-weight:600;
+     white-space:nowrap;position:relative}
+  td{padding:.42rem .55rem;border-top:1px solid #EDF2F7;white-space:nowrap}
+  tbody tr:nth-child(even){background:#F8FAFC}
+  tbody tr:hover{background:#EAF1F4}
+  th.sortable{cursor:pointer;user-select:none}
+  th.sortable:hover{background:#1d4a5b}
+  .tbl-note{font-size:.75rem;color:#64748B;margin-top:.45rem}
+
+  .btn{background:#245B70;color:#fff;border:none;padding:.5rem .85rem;border-radius:9px;
+       cursor:pointer;font-size:.8rem;font-weight:600;font-family:inherit;transition:filter .15s}
+  .btn:hover{filter:brightness(1.1)}
+  .btn.sec{background:#6B9B83}
+  .btn.warn{background:#F2C66D;color:#263238}
+  .btn.ghost{background:#fff;border:1px solid #CBD5E1;color:#263238}
+  .btn.danger{background:#C0574F}
+  .btn.sm{padding:.3rem .55rem;font-size:.72rem}
+
+  .controls{display:flex;flex-wrap:wrap;gap:.55rem;align-items:flex-end;margin-bottom:.8rem}
+  .field{display:flex;flex-direction:column;gap:.2rem}
+  .field label{font-size:.72rem;font-weight:600;color:#64748B;text-transform:uppercase;letter-spacing:.3px}
+  select,input[type=text],input[type=number]{
+    font-family:inherit;font-size:.82rem;padding:.42rem .5rem;border:1px solid #CBD5E1;
+    border-radius:8px;background:#fff;color:#263238;min-width:120px
+  }
+  select:focus,input:focus{outline:2px solid #6B9B83;outline-offset:1px}
+
+  .interp{background:#FFFBF0;border-left:4px solid #F2C66D;padding:.75rem .9rem;
+          border-radius:0 10px 10px 0;font-size:.84rem;margin-top:.75rem}
+  .interp strong{color:#245B70}
+  .note{background:#F1F7F4;border-left:4px solid #6B9B83;padding:.7rem .9rem;
+        border-radius:0 10px 10px 0;font-size:.83rem;margin-top:.75rem}
+  .note strong{color:#245B70}
+  .warnbox{background:#FDF3F2;border-left:4px solid #C0574F;padding:.7rem .9rem;
+           border-radius:0 10px 10px 0;font-size:.83rem;margin-top:.75rem}
+  .warnbox strong{color:#A34640}
+
+  .badge{display:inline-block;font-size:.68rem;font-weight:700;padding:.12rem .45rem;
+         border-radius:99px;letter-spacing:.2px}
+  .b-cuant{background:#E4EFF3;color:#245B70}
+  .b-cual{background:#EAF2EE;color:#4A7A62}
+  .b-ord{background:#FBF1DC;color:#8A6A20}
+
+  .formula{font-family:'Cambria Math',Georgia,serif;font-size:.92rem;color:#245B70;
+           background:#F1F7F4;padding:.5rem .7rem;border-radius:8px;display:inline-block;margin:.35rem 0}
+
+  .chart-box{background:#fff;border:1px solid #E2E8F0;border-radius:12px;padding:.75rem}
+  .chart-box canvas{width:100%;height:310px;display:block}
+  .chart-cap{font-size:.78rem;color:#64748B;margin-top:.45rem;line-height:1.45}
+
+  .legend{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.4rem;font-size:.74rem;color:#64748B}
+  .legend span{display:flex;align-items:center;gap:.3rem}
+  .legend i{width:11px;height:11px;border-radius:3px;display:inline-block}
+
+  .result-box{background:#F1F7F4;border:1px solid #CFE0D7;border-radius:10px;padding:.75rem .9rem;margin-top:.7rem}
+  .result-box .big{font-size:1.15rem;font-weight:700;color:#245B70}
+
+  .q-num{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;
+         background:#245B70;color:#fff;border-radius:50%;font-size:.7rem;font-weight:700;margin-right:.35rem}
+
+  ul.clean{margin:.35rem 0 .35rem 1.1rem;padding:0;font-size:.85rem}
+  ul.clean li{margin:.2rem 0}
+
+  .small{font-size:.78rem;color:#64748B}
+
+  @media (max-width:600px){
+    body{font-size:14px}
+    main{padding:.9rem .6rem 3rem}
+    .chart-box canvas{height:270px}
+    th,td{padding:.35rem .4rem;font-size:.75rem}
+  }
+
+  @media print{
+    nav,.no-print,header.hero .tag{display:none !important}
+    section{display:block !important;page-break-inside:avoid}
+    .card{box-shadow:none;border:1px solid #ccc}
+    body{background:#fff}
+    main{max-width:100%}
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <h1>Laboratorio de Estadística Aplicada · Uso de herramientas de Inteligencia Artificial y Rendimiento Académico</h1>
+  <p>Cuestionario, base de datos sintética, distribuciones de frecuencia, estadística descriptiva, chi-cuadrado, correlación de Pearson y regresión lineal simple — todo calculado en vivo desde los datos visibles.</p>
+  <span class="tag">DATOS SINTÉTICOS CON FINES EDUCATIVOS</span>
+</header>
+
+<nav>
+  <div class="nav-inner">
+    <ul class="nav-links" id="navLinks">
+      <li><button data-target="inicio" class="active">🏠 Inicio</button></li>
+      <li><button data-target="cuestionario">📋 Cuestionario</button></li>
+      <li><button data-target="datos">🗄️ Base de datos</button></li>
+      <li><button data-target="frecuencias">📊 Frecuencias</button></li>
+      <li><button data-target="descriptiva">📐 Descriptiva</button></li>
+      <li><button data-target="pruebas">🧪 Pruebas</button></li>
+      <li><button data-target="graficos">📈 Gráficos</button></li>
+      <li><button data-target="guia">💡 Guía</button></li>
+    </ul>
+  </div>
+</nav>
+
+<main>
+
+<!-- ================= INICIO ================= -->
+<section id="inicio" class="active">
+  <h2>Presentación del estudio</h2>
+
+  <div class="card">
+    <h3 style="margin-top:0">Objetivo estadístico</h3>
+    <p>Describir el uso de herramientas de inteligencia artificial (IA) en estudiantes universitarios y analizar su relación con el rendimiento académico medido a través del promedio del último ciclo, controlando el tiempo de estudio sin IA, la confianza en la herramienta y la percepción del propio rendimiento.</p>
+    <h3>Variables del estudio</h3>
+    <div class="grid">
+      <div>
+        <h4>Cuantitativas</h4>
+        <ul class="clean">
+          <li><b>Horas de uso de IA</b> por semana (0–30 h)</li>
+          <li><b>Promedio académico</b> del último ciclo (0–20)</li>
+          <li><b>Horas de estudio sin IA</b> por semana</li>
+          <li><b>Edad</b> (años)</li>
+        </ul>
+      </div>
+      <div>
+        <h4>Cualitativas</h4>
+        <ul class="clean">
+          <li>Sexo, área de estudios</li>
+          <li>Frecuencia de uso de IA (ordinal)</li>
+          <li>Herramienta principal y propósito de uso</li>
+          <li>Percepción del rendimiento, uso ético (ordinal)</li>
+        </ul>
+      </div>
+      <div>
+        <h4>Ordinales 1–5</h4>
+        <ul class="clean">
+          <li>Confianza en las respuestas de la IA</li>
+          <li>Satisfacción con los resultados</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <h3>Resumen de la base de datos actual</h3>
+  <div class="grid" id="kpiGrid"></div>
+
+  <div class="card">
+    <h3 style="margin-top:0">Técnicas estadísticas disponibles</h3>
+    <ul class="clean">
+      <li><b>Distribuciones de frecuencia</b> — absolutas, relativas, porcentuales y acumuladas; intervalos y marcas de clase.</li>
+      <li><b>Estadística descriptiva</b> — media, mediana, moda, mínimo, máximo, rango, varianza y desviación estándar muestrales, cuartiles y percentiles.</li>
+      <li><b>Tablas de contingencia y chi-cuadrado</b> — asociación entre variables cualitativas, con verificación de frecuencias esperadas.</li>
+      <li><b>Correlación de Pearson</b> — dirección e intensidad de la relación entre dos variables cuantitativas.</li>
+      <li><b>Regresión lineal simple</b> — ecuación estimada, pendiente, intercepto, R² y predicciones dentro del rango observado.</li>
+    </ul>
+    <div class="note"><strong>Importante:</strong> la base de datos es <b>sintética</b>, generada con fines didácticos. Los resultados son reales respecto de los datos mostrados, pero no provienen de personas reales. Una correlación nunca demuestra causalidad.</div>
+  </div>
+</section>
+
+<!-- ================= CUESTIONARIO ================= -->
+<section id="cuestionario">
+  <h2>Cuestionario aplicado</h2>
+  <div class="card">
+    <p class="small">Instrumento de 13 preguntas. Cada pregunta corresponde a una variable de la base de datos; se indica su tipo y su codificación.</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>N°</th><th>Pregunta</th><th>Variable</th><th>Tipo</th><th>Codificación</th></tr>
+        </thead>
+        <tbody id="tbodyCuestionario"></tbody>
+      </table>
+    </div>
+    <div class="interp">
+      <strong>¿Cómo se interpreta?</strong> El cuestionario es el puente entre el concepto teórico y el número. Las variables <b>cuantitativas</b> permiten calcular medias, desviaciones estándar, correlaciones y regresiones; las <b>cualitativas nominales</b> permiten construir tablas de contingencia y gráficos de barras o circulares; las <b>ordinales</b> admiten frecuencias y, con precaución, promedios. La codificación debe ser exhaustiva (toda respuesta posible debe tener un código) y mutuamente excluyente (una respuesta no puede tener dos códigos).
+    </div>
+  </div>
+</section>
+
+<!-- ================= BASE DE DATOS ================= -->
+<section id="datos">
+  <h2>Base de datos sintética</h2>
+
+  <div class="card">
+    <div class="controls no-print">
+      <div class="field">
+        <label>Buscar (cualquier campo)</label>
+        <input type="text" id="filtroTexto" placeholder="Ej. ChatGPT, Ingeniería…">
+      </div>
+      <div class="field">
+        <label>Filtrar por área</label>
+        <select id="filtroCarrera"><option value="">Todas</option></select>
+      </div>
+      <div class="field">
+        <label>Filtrar por percepción</label>
+        <select id="filtroPercepcion"><option value="">Todas</option></select>
+      </div>
+      <button class="btn ghost" id="btnLimpiarFiltros">Limpiar filtros</button>
+    </div>
+
+    <div class="controls no-print">
+      <div class="field">
+        <label>Tamaño de la nueva muestra</label>
+        <input type="number" id="inputN" value="45" min="10" max="400" step="1" style="width:110px">
+      </div>
+      <button class="btn sec" id="btnRegenerar">🔄 Generar nueva muestra</button>
+      <button class="btn warn" id="btnDescargar">⬇️ Descargar CSV</button>
+      <button class="btn ghost" id="btnImprimir">🖨️ Imprimir / PDF</button>
+      <button class="btn ghost" id="btnToggleForm">➕ Agregar registro manual</button>
+    </div>
+
+    <div id="formNuevo" style="display:none;border:1px dashed #CBD5E1;border-radius:10px;padding:.8rem;margin-bottom:.9rem">
+      <h4 style="margin-top:0">Nuevo registro</h4>
+      <div class="grid">
+        <div class="field"><label>Edad (años)</label><input type="number" id="f_edad" value="20" min="15" max="70"></div>
+        <div class="field"><label>Sexo</label><select id="f_sexo"></select></div>
+        <div class="field"><label>Área de estudios</label><select id="f_carrera"></select></div>
+        <div class="field"><label>Horas de IA / semana</label><input type="number" id="f_horasIA" value="6" min="0" max="60" step="0.5"></div>
+        <div class="field"><label>Frecuencia de uso</label><select id="f_frecuenciaIA"></select></div>
+        <div class="field"><label>Herramienta principal</label><select id="f_herramienta"></select></div>
+        <div class="field"><label>Propósito principal</label><select id="f_proposito"></select></div>
+        <div class="field"><label>Confianza en la IA (1-5)</label><select id="f_confianza"></select></div>
+        <div class="field"><label>Promedio académico (0-20)</label><input type="number" id="f_promedio" value="14" min="0" max="20" step="0.1"></div>
+        <div class="field"><label>Horas de estudio sin IA</label><input type="number" id="f_horasEstudio" value="8" min="0" max="60" step="0.5"></div>
+        <div class="field"><label>Percepción del rendimiento</label><select id="f_percepcion"></select></div>
+        <div class="field"><label>Uso ético (citación)</label><select id="f_usoEtico"></select></div>
+        <div class="field"><label>Satisfacción con la IA (1-5)</label><select id="f_satisfaccion"></select></div>
+      </div>
+      <div style="margin-top:.75rem;display:flex;gap:.5rem;flex-wrap:wrap">
+        <button class="btn" id="btnAgregar">Guardar registro</button>
+        <button class="btn ghost" id="btnCancelarForm">Cancelar</button>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table id="tablaDatos">
+        <thead><tr id="theadDatos"></tr></thead>
+        <tbody id="tbodyDatos"></tbody>
+      </table>
+    </div>
+    <p class="tbl-note" id="infoTabla"></p>
+    <div class="note"><strong>Nota metodológica:</strong> esta base es <b>sintética</b> y se genera con fines educativos. Puedes filtrar, ordenar, agregar o eliminar registros y todos los cálculos, tablas y gráficos de la aplicación se recalcularán automáticamente a partir de la base visible.</div>
+  </div>
+</section>
+
+<!-- ================= FRECUENCIAS ================= -->
+<section id="frecuencias">
+  <h2>Distribuciones de frecuencia</h2>
+
+  <div class="card">
+    <h3 style="margin-top:0">Variable cualitativa</h3>
+    <div class="controls no-print">
+      <div class="field"><label>Variable</label><select id="selFrecCual"></select></div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Categoría</th><th>f<sub>a</sub> (absoluta)</th><th>f<sub>r</sub> (relativa)</th>
+            <th>%</th><th>F<sub>a</sub> (acumulada)</th><th>F<sub>r</sub> acumulada</th><th>% acumulado</th>
+          </tr>
+        </thead>
+        <tbody id="tbodyFrecCual"></tbody>
+      </table>
+    </div>
+    <div class="interp" id="interpFrecCual"></div>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0">Variable cuantitativa agrupada en intervalos</h3>
+    <div class="controls no-print">
+      <div class="field"><label>Variable</label><select id="selFrecCuant"></select></div>
+      <div class="field"><label>N° de intervalos (k)</label><input type="number" id="inputK" value="0" min="0" max="15" style="width:100px"></div>
+    </div>
+    <p class="small" id="infoIntervalos"></p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Intervalo</th><th>Marca de clase (x<sub>i</sub>)</th><th>f<sub>a</sub></th>
+            <th>f<sub>r</sub></th><th>%</th><th>F<sub>a</sub></th><th>% acumulado</th>
+          </tr>
+        </thead>
+        <tbody id="tbodyFrecCuant"></tbody>
+      </table>
+    </div>
+    <div class="interp" id="interpFrecCuant"></div>
+  </div>
+</section>
+
+<!-- ================= DESCRIPTIVA ================= -->
+<section id="descriptiva">
+  <h2>Estadística descriptiva</h2>
+  <div class="card">
+    <div class="controls no-print">
+      <div class="field"><label>Variable cuantitativa</label><select id="selDesc"></select></div>
+    </div>
+    <div class="grid2">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Estadístico</th><th>Valor</th></tr></thead>
+          <tbody id="tbodyDesc"></tbody>
+        </table>
+      </div>
+      <div>
+        <div class="result-box" id="boxDescResumen"></div>
+        <div class="interp" id="interpDesc"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= PRUEBAS ================= -->
+<section id="pruebas">
+  <h2>Pruebas estadísticas</h2>
+
+  <div class="card">
+    <h3 style="margin-top:0">1. Tabla de contingencia y prueba chi-cuadrado</h3>
+    <div class="controls no-print">
+      <div class="field"><label>Variable fila</label><select id="selChi1"></select></div>
+      <div class="field"><label>Variable columna</label><select id="selChi2"></select></div>
+    </div>
+    <h4>Hipótesis</h4>
+    <p class="small" id="txtHipotesis"></p>
+    <h4>Frecuencias observadas</h4>
+    <div class="table-wrap"><table id="tablaContingencia"><thead></thead><tbody></tbody><tfoot></tfoot></table></div>
+    <h4>Frecuencias esperadas</h4>
+    <div class="table-wrap"><table id="tablaEsperadas"><thead></thead><tbody></tbody></table></div>
+    <div class="result-box" id="boxChi"></div>
+    <div class="interp" id="interpChi"></div>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0">2. Correlación de Pearson</h3>
+    <div class="controls no-print">
+      <div class="field"><label>Variable X</label><select id="selCorrX"></select></div>
+      <div class="field"><label>Variable Y</label><select id="selCorrY"></select></div>
+    </div>
+    <div class="result-box" id="boxCorr"></div>
+    <div class="interp" id="interpCorr"></div>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0">3. Regresión lineal simple</h3>
+    <p class="small">Se usa la misma pareja de variables seleccionada en la correlación: X = variable predictora, Y = variable de respuesta.</p>
+    <div class="result-box" id="boxReg"></div>
+    <h4>Valores observados y estimados</h4>
+    <div class="table-wrap"><table>
+      <thead><tr><th>#</th><th>X observada</th><th>Y observada</th><th>Ŷ estimada</th><th>Residuo</th></tr></thead>
+      <tbody id="tbodyReg"></tbody>
+    </table></div>
+    <h4>Predicción</h4>
+    <div class="controls no-print">
+      <div class="field"><label>Valor de X para predecir</label><input type="number" id="inputPred" step="0.1"></div>
+      <button class="btn sec" id="btnPredecir">Calcular Ŷ</button>
+    </div>
+    <div class="result-box" id="boxPred" style="display:none"></div>
+    <div class="interp" id="interpReg"></div>
+  </div>
+</section>
+
+<!-- ================= GRÁFICOS ================= -->
+<section id="graficos">
+  <h2>Gráficos</h2>
+
+  <div class="grid2">
+    <div class="chart-box">
+      <div class="controls no-print" style="margin-bottom:.4rem">
+        <div class="field"><label>Variable (barras)</label><select id="selBarra"></select></div>
+      </div>
+      <canvas id="cvBarra"></canvas>
+      <p class="chart-cap" id="capBarra"></p>
+    </div>
+
+    <div class="chart-box">
+      <div class="controls no-print" style="margin-bottom:.4rem">
+        <div class="field"><label>Variable (circular)</label><select id="selPastel"></select></div>
+      </div>
+      <canvas id="cvPastel"></canvas>
+      <p class="chart-cap" id="capPastel"></p>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="chart-box">
+      <div class="controls no-print" style="margin-bottom:.4rem">
+        <div class="field"><label>Variable (histograma)</label><select id="selHist"></select></div>
+      </div>
+      <canvas id="cvHist"></canvas>
+      <p class="chart-cap" id="capHist"></p>
+    </div>
+
+    <div class="chart-box">
+      <div class="controls no-print" style="margin-bottom:.4rem">
+        <div class="field"><label>Variable (polígono)</label><select id="selPoli"></select></div>
+      </div>
+      <canvas id="cvPoli"></canvas>
+      <p class="chart-cap" id="capPoli"></p>
+    </div>
+  </div>
+
+  <div class="chart-box">
+    <div class="controls no-print" style="margin-bottom:.4rem">
+      <div class="field"><label>X (dispersión)</label><select id="selScatX"></select></div>
+      <div class="field"><label>Y (dispersión)</label><select id="selScatY"></select></div>
+    </div>
+    <canvas id="cvScat" style="height:360px"></canvas>
+    <p class="chart-cap" id="capScat"></p>
+  </div>
+</section>
+
+<!-- ================= GUÍA ================= -->
+<section id="guia">
+  <h2>Guía de interpretación</h2>
+
+  <div class="card">
+    <h3 style="margin-top:0">1. Distribuciones de frecuencia</h3>
+    <p>La <b>frecuencia absoluta (f<sub>a</sub>)</b> indica cuántos casos hay en una categoría o intervalo. La <b>frecuencia relativa (f<sub>r</sub>)</b> es esa cantidad dividida entre el total (n) y siempre suma 1. La <b>frecuencia porcentual</b> es f<sub>r</sub> × 100 y responde a “¿qué porcentaje del grupo…?”. Las <b>frecuencias acumuladas</b> solo tienen sentido cuando las categorías tienen un orden (variables ordinales o intervalos de clase): indican cuántos casos están en esa categoría <i>o por debajo</i>.</p>
+    <p>En datos cuantitativos, agrupar en <b>intervalos de clase</b> sacrifica detalle a cambio de una visión global. La <b>marca de clase</b> (punto medio del intervalo) representa a todos los valores del intervalo y es la base del histograma y del polígono de frecuencias.</p>
+    <div class="interp"><strong>Limitación:</strong> al agrupar se pierde información individual. Dos bases distintas pueden producir la misma tabla agrupada. Por eso los cálculos exactos (media, varianza, correlación) deben hacerse siempre con los datos sin agrupar, como se hace en esta aplicación.</div>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0">2. Medidas descriptivas</h3>
+    <ul class="clean">
+      <li><b>Media:</b> centro de gravedad de los datos; se ve afectada por valores extremos.</li>
+      <li><b>Mediana:</b> valor que deja al 50 % de los casos por debajo; es robusta frente a valores atípicos.</li>
+      <li><b>Moda:</b> valor o categoría más frecuente; en datos continuos puede no ser única.</li>
+      <li><b>Rango:</b> máximo − mínimo; muy sensible a los extremos.</li>
+      <li><b>Varianza y desviación estándar muestrales:</b> dispersión promedio respecto de la media. La desviación estándar está en las mismas unidades que los datos.</li>
+      <li><b>Coeficiente de variación (CV):</b> desviación estándar dividida entre la media; permite comparar dispersión entre variables con escalas distintas. Sobre 30 % se considera dispersión alta.</li>
+      <li><b>Cuartiles y percentiles:</b> dividen la distribución en partes. El rango intercuartílico (Q3 − Q1) concentra al 50 % central de los casos.</li>
+    </ul>
+    <div class="interp"><strong>Regla práctica:</strong> si media ≈ mediana, la distribución es aproximadamente simétrica. Si media &gt; mediana hay asimetría positiva (cola hacia valores altos); si media &lt; mediana, asimetría negativa.</div>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0">3. Chi-cuadrado de independencia</h3>
+    <p>Contrasta si dos variables cualitativas están asociadas. <b>H<sub>0</sub>:</b> las variables son independientes. <b>H<sub>1</sub>:</b> existe asociación. Se comparan las frecuencias <b>observadas</b> con las <b>esperadas</b> bajo independencia (E = total fila × total columna / n).</p>
+    <p class="formula">χ² = Σ (O − E)² / E &nbsp;&nbsp;&nbsp; gl = (filas − 1)(columnas − 1)</p>
+    <p>Si el valor p es menor que 0.05 se rechaza H<sub>0</sub> y se concluye que hay evidencia de asociación. <b>Supuesto:</b> no más del 20 % de las celdas deben tener frecuencia esperada menor que 5, y ninguna debe ser menor que 1. Si se incumple, conviene agrupar categorías o usar la prueba exacta de Fisher.</p>
+    <div class="warnbox"><strong>Advertencia:</strong> el chi-cuadrado detecta asociación, no causalidad ni dirección. Además, con muestras muy grandes, diferencias triviales pueden resultar “significativas”: conviene acompañar el valor p con una medida de tamaño del efecto (V de Cramér).</div>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0">4. Correlación de Pearson (r)</h3>
+    <p>Mide la <b>dirección</b> y la <b>intensidad</b> de la relación <b>lineal</b> entre dos variables cuantitativas. Toma valores entre −1 y +1.</p>
+    <ul class="clean">
+      <li><b>Signo:</b> positivo → al aumentar X tiende a aumentar Y; negativo → al aumentar X tiende a disminuir Y.</li>
+      <li><b>Intensidad:</b> |r| &lt; 0.30 débil; 0.30–0.59 moderada; 0.60–0.79 fuerte; ≥ 0.80 muy fuerte.</li>
+      <li><b>r ≈ 0</b> indica ausencia de relación <i>lineal</i>, pero puede existir una relación curva.</li>
+    </ul>
+    <div class="warnbox"><strong>Correlación no implica causalidad.</strong> Una tercera variable (por ejemplo, el tiempo de estudio o la motivación) podría explicar la relación, o la dirección podría ser la inversa: quizá quienes tienen mejor promedio usan más IA, y no al revés.</div>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0">5. Regresión lineal simple</h3>
+    <p class="formula">Ŷ = b<sub>0</sub> + b<sub>1</sub>·X</p>
+    <p><b>b<sub>1</sub> (pendiente):</b> cambio esperado en Y por cada unidad adicional de X. <b>b<sub>0</sub> (intercepto):</b> valor esperado de Y cuando X = 0; a veces no tiene interpretación sustantiva.</p>
+    <p><b>R²:</b> proporción de la variabilidad de Y explicada por X. Va de 0 a 1; 0.35 significa que el modelo explica el 35 % de la varianza de Y, y el 65 % restante depende de otras variables.</p>
+    <div class="interp"><strong>Prudencia al predecir:</strong> solo es válido predecir <i>dentro del rango observado</i> de X. Fuera de ese rango la relación puede cambiar y la predicción deja de ser confiable. Además, la regresión describe una tendencia promedio: los residuos muestran que ningún modelo predice perfectamente a cada individuo.</div>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0">6. Uso responsable de este laboratorio</h3>
+    <ul class="clean">
+      <li>Los datos son sintéticos: sirven para practicar, no para afirmar nada sobre estudiantes reales.</li>
+      <li>Cambia el tamaño de la muestra y observa cómo varían r, R² y el valor p: esa es la lección sobre la <b>estabilidad muestral</b>.</li>
+      <li>Interpreta siempre el valor numérico junto con el contexto, el tamaño del efecto y las limitaciones.</li>
+      <li>Reporta los resultados con sus grados de libertad, n y valor p, no solo con la conclusión.</li>
+    </ul>
+  </div>
+</section>
+
+</main>
+
+<script>
+"use strict";
+
+/* =========================================================
+   1. CONSTANTES Y CATÁLOGOS
+   ========================================================= */
+const CARRERAS = ['Ingeniería','Ciencias de la Salud','Ciencias Sociales','Artes y Humanidades','Ciencias Económicas'];
+const SEXOS = ['Femenino','Masculino'];
+const HERRAMIENTAS = ['ChatGPT','Copilot','Gemini','Claude','Otra'];
+const FRECUENCIAS = ['Nunca','Rara vez','A veces','Frecuente','Muy frecuente'];
+const PROPOSITOS = ['Resúmenes','Resolución de problemas','Redacción','Programación','Preparación de exámenes'];
+const PERCEPCIONES = ['Empeoró','Se mantuvo igual','Mejoró'];
+const ETICA = ['Siempre cita','A veces cita','Nunca cita'];
+const ESCALA5 = ['1','2','3','4','5'];
+
+const VARS = {
+  id:            {label:'ID',                        tipo:'identificador'},
+  edad:          {label:'Edad (años)',                tipo:'cuantitativa'},
+  sexo:          {label:'Sexo',                       tipo:'cualitativa nominal'},
+  carrera:       {label:'Área de estudios',           tipo:'cualitativa nominal'},
+  horasIA:       {label:'Horas de IA / semana',       tipo:'cuantitativa'},
+  frecuenciaIA:  {label:'Frecuencia de uso de IA',    tipo:'cualitativa ordinal'},
+  herramienta:   {label:'Herramienta principal',      tipo:'cualitativa nominal'},
+  proposito:     {label:'Propósito principal',        tipo:'cualitativa nominal'},
+  confianza:     {label:'Confianza en la IA (1-5)',   tipo:'ordinal'},
+  promedio:      {label:'Promedio académico (0-20)',  tipo:'cuantitativa'},
+  horasEstudio:  {label:'Horas de estudio sin IA',    tipo:'cuantitativa'},
+  percepcion:    {label:'Percepción del rendimiento', tipo:'cualitativa ordinal'},
+  usoEtico:      {label:'Uso ético (citación)',       tipo:'cualitativa ordinal'},
+  satisfaccion:  {label:'Satisfacción con la IA (1-5)',tipo:'ordinal'}
+};
+
+const COLS = ['id','edad','sexo','carrera','horasIA','frecuenciaIA','herramienta','proposito',
+              'confianza','promedio','horasEstudio','percepcion','usoEtico','satisfaccion'];
+
+const CAT_ORDER = {
+  sexo: SEXOS,
+  carrera: CARRERAS,
+  frecuenciaIA: FRECUENCIAS,
+  herramienta: HERRAMIENTAS,
+  proposito: PROPOSITOS,
+  percepcion: PERCEPCIONES,
+  usoEtico: ETICA,
+  confianza: ESCALA5,
+  satisfaccion: ESCALA5
+};
+
+const CAT_VARS = ['sexo','carrera','frecuenciaIA','herramienta','proposito','percepcion','usoEtico','confianza','satisfaccion'];
+const QUANT_VARS = ['edad','horasIA','promedio','horasEstudio','confianza','satisfaccion'];
+
+const PALETA = ['#245B70','#6B9B83','#F2C66D','#8FB3C4','#A8C3A0','#D9B37A','#4A7C8C','#B7CDBF','#7C9CA8','#C9A66B'];
+
+/* =========================================================
+   2. UTILIDADES
+   ========================================================= */
+function randn(){
+  let u=0,v=0;
+  while(u===0) u=Math.random();
+  while(v===0) v=Math.random();
+  return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);
+}
+function pickW(items, weights){
+  const r = Math.random();
+  let acc = 0;
+  for(let i=0;i<items.length;i++){
+    acc += weights[i];
+    if(r <= acc) return items[i];
+  }
+  return items[items.length-1];
+}
+function esc(s){
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function n1(x){ return isFinite(x) ? x.toFixed(1) : '—'; }
+function n2(x){ return isFinite(x) ? x.toFixed(2) : '—'; }
+function n3(x){ return isFinite(x) ? x.toFixed(3) : '—'; }
+function n4(x){ return isFinite(x) ? x.toFixed(4) : '—'; }
+function pFmt(p){
+  if(!isFinite(p)) return '—';
+  if(p < 0.001) return '< 0.001';
+  return p.toFixed(4);
+}
+function mean(a){
+  if(!a.length) return NaN;
+  return a.reduce((s,x)=>s+x,0)/a.length;
+}
+function varianceS(a){
+  const n = a.length;
+  if(n < 2) return NaN;
+  const m = mean(a);
+  return a.reduce((s,x)=>s+(x-m)*(x-m),0)/(n-1);
+}
+function sdS(a){ const v = varianceS(a); return isFinite(v) ? Math.sqrt(v) : NaN; }
+function sortedNum(a){ return a.slice().sort((x,y)=>x-y); }
+function percentile(sorted, p){
+  const n = sorted.length;
+  if(n === 0) return NaN;
+  if(n === 1) return sorted[0];
+  const idx = (n-1)*p/100;
+  const lo = Math.floor(idx), hi = Math.ceil(idx);
+  if(lo === hi) return sorted[lo];
+  return sorted[lo] + (sorted[hi]-sorted[lo])*(idx-lo);
+}
+function modaNum(a){
+  const m = new Map();
+  a.forEach(v=>m.set(v,(m.get(v)||0)+1));
+  let best = 0, vals = [];
+  m.forEach((c,v)=>{
+    if(c > best){ best = c; vals = [v]; }
+    else if(c === best){ vals.push(v); }
+  });
+  return {vals, count: best, unica: vals.length === 1};
+}
+function niceCeil(v){
+  if(!isFinite(v) || v <= 0) return 1;
+  const exp = Math.floor(Math.log10(v));
+  const f = v / Math.pow(10, exp);
+  let nf;
+  if(f <= 1) nf = 1; else if(f <= 2) nf = 2; else if(f <= 5) nf = 5; else nf = 10;
+  return nf * Math.pow(10, exp);
+}
+
+/* ---- Distribuciones de probabilidad para valores p ---- */
+function logGamma(z){
+  const g = 7;
+  const c = [0.99999999999980993, 676.5203681218851, -1259.1392167224028,
+             771.32342877765313, -176.61502916214059, 12.507343278686905,
+             -0.13857109526572012, 9.9843695780195716e-6, 1.5056327351493116e-7];
+  if(z < 0.5) return Math.log(Math.PI/Math.sin(Math.PI*z)) - logGamma(1-z);
+  z -= 1;
+  let x = c[0];
+  for(let i=1;i<g+2;i++) x += c[i]/(z+i);
+  const t = z + g + 0.5;
+  return 0.5*Math.log(2*Math.PI) + (z+0.5)*Math.log(t) - t + Math.log(x);
+}
+function gammaP(s, x){
+  if(x < 0 || s <= 0) return NaN;
+  if(x === 0) return 0;
+  if(x < s + 1){
+    let sum = 1/s, term = sum, nn = s;
+    for(let i=0;i<300;i++){
+      nn += 1; term *= x/nn; sum += term;
+      if(Math.abs(term) < Math.abs(sum)*1e-15) break;
+    }
+    return sum * Math.exp(-x + s*Math.log(x) - logGamma(s));
+  } else {
+    let b = x + 1 - s, c = 1e300, d = 1/b, h = d;
+    for(let i=1;i<=300;i++){
+      const an = -i*(i-s);
+      b += 2;
+      d = an*d + b; if(Math.abs(d) < 1e-300) d = 1e-300;
+      c = b + an/c;  if(Math.abs(c) < 1e-300) c = 1e-300;
+      d = 1/d;
+      const del = d*c;
+      h *= del;
+      if(Math.abs(del-1) < 1e-15) break;
+    }
+    return 1 - Math.exp(-x + s*Math.log(x) - logGamma(s))*h;
+  }
+}
+function chiP(x, df){
+  if(!isFinite(x) || df <= 0) return NaN;
+  if(x <= 0) return 1;
+  return Math.max(0, Math.min(1, 1 - gammaP(df/2, x/2)));
+}
+function betacf(a,b,x){
+  const MAXIT = 300, EPS = 3e-15, FPMIN = 1e-300;
+  const qab = a+b, qap = a+1, qam = a-1;
+  let c = 1, d = 1 - qab*x/qap;
+  if(Math.abs(d) < FPMIN) d = FPMIN;
+  d = 1/d;
+  let h = d;
+  for(let m=1;m<=MAXIT;m++){
+    const m2 = 2*m;
+    let aa = m*(b-m)*x/((qam+m2)*(a+m2));
+    d = 1 + aa*d; if(Math.abs(d) < FPMIN) d = FPMIN;
+    c = 1 + aa/c; if(Math.abs(c) < FPMIN) c = FPMIN;
+    d = 1/d; h *= d*c;
+    aa = -(a+m)*(qab+m)*x/((a+m2)*(qap+m2));
+    d = 1 + aa*d; if(Math.abs(d) < FPMIN) d = FPMIN;
+    c = 1 + aa/c; if(Math.abs(c) < FPMIN) c = FPMIN;
+    d = 1/d;
+    const del = d*c;
+    h *= del;
+    if(Math.abs(del-1) < EPS) break;
+  }
+  return h;
+}
+function betaI(a,b,x){
+  if(x <= 0) return 0;
+  if(x >= 1) return 1;
+  const bt = Math.exp(logGamma(a+b) - logGamma(a) - logGamma(b) + a*Math.log(x) + b*Math.log(1-x));
+  if(x < (a+1)/(a+b+2)) return bt*betacf(a,b,x)/a;
+  return 1 - bt*betacf(b,a,1-x)/b;
+}
+function tP2(t, df){
+  if(!isFinite(t) || df <= 0) return NaN;
+  const x = df/(df + t*t);
+  return Math.max(0, Math.min(1, betaI(df/2, 0.5, x)));
+}
+
+/* =========================================================
+   3. GENERACIÓN DE DATOS SINTÉTICOS
+   ========================================================= */
+let DATA = [];
+let nextId = 1;
+
+function generarMuestra(n){
+  const out = [];
+  for(let i=0;i<n;i++){
+    const edad = 18 + Math.floor(Math.random()*11);
+
+    const sexo = Math.random() < 0.53 ? 'Femenino' : 'Masculino';
+    const carrera = CARRERAS[Math.floor(Math.random()*CARRERAS.length)];
+
+    const r = Math.random();
+    let fIdx;
+    if(r < 0.05) fIdx = 0;
+    else if(r < 0.17) fIdx = 1;
+    else if(r < 0.45) fIdx = 2;
+    else if(r < 0.80) fIdx = 3;
+    else fIdx = 4;
+    const frecuenciaIA = FRECUENCIAS[fIdx];
+
+    let horasIA = fIdx*3.4 + (Math.random()*4 - 1.2);
+    horasIA = Math.max(0, Math.min(28, Math.round(horasIA*10)/10));
+
+    const herramienta = pickW(HERRAMIENTAS,[0.45,0.15,0.19,0.12,0.09]);
+    const proposito = PROPOSITOS[Math.floor(Math.random()*PROPOSITOS.length)];
+
+    const confianza = 1 + Math.floor(Math.random()*5);
+    const horasEstudio = Math.round((2 + Math.random()*16)*10)/10;
+
+    let promedio = 9.8 + 0.27*horasEstudio - 0.10*horasIA + 0.32*confianza + randn()*1.3;
+    promedio = Math.max(6, Math.min(20, Math.round(promedio*10)/10));
+
+    let wPer;
+    if(horasIA < 5)       wPer = [0.20,0.48,0.32];
+    else if(horasIA < 13) wPer = [0.28,0.40,0.32];
+    else                  wPer = [0.42,0.33,0.25];
+    const percepcion = pickW(PERCEPCIONES, wPer);
+
+    const usoEtico = pickW(ETICA,[0.38,0.47,0.15]);
+
+    let satisfaccion = Math.round(2.6 + horasIA*0.07 + randn()*0.9);
+    satisfaccion = Math.max(1, Math.min(5, satisfaccion));
+
+    out.push({
+      id: nextId++, edad, sexo, carrera, horasIA, frecuenciaIA, herramienta,
+      proposito, confianza, promedio, horasEstudio, percepcion, usoEtico, satisfaccion
+    });
+  }
+  return out;
+}
+
+/* =========================================================
+   4. CÁLCULOS ESTADÍSTICOS
+   ========================================================= */
+function colNumerica(key){
+  return DATA.map(r => Number(r[key])).filter(v => isFinite(v));
+}
+function valoresUnicos(key){
+  const set = new Set(DATA.map(r => String(r[key])));
+  const orden = (CAT_ORDER[key] || []).map(String).filter(v => set.has(v));
+  const resto = [...set].filter(v => !orden.includes(v)).sort();
+  return orden.concat(resto);
+}
+function tablaFrecuenciaCual(key){
+  const counts = new Map();
+  DATA.forEach(r => {
+    const v = String(r[key]);
+    counts.set(v, (counts.get(v)||0)+1);
+  });
+  let cats = (CAT_ORDER[key] || []).map(String).filter(c => counts.has(c));
+  if(!cats.length){
+    cats = [...counts.keys()].sort((a,b)=>counts.get(b)-counts.get(a));
+  } else {
+    [...counts.keys()].forEach(c => { if(!cats.includes(c)) cats.push(c); });
+  }
+  const n = DATA.length;
+  let acc = 0;
+  return cats.map(c => {
+    const fa = counts.get(c) || 0;
+    acc += fa;
+    return {cat:c, fa, fr: n? fa/n : 0, pct: n? fa/n*100 : 0,
+            Fa: acc, Fr: n? acc/n : 0, Fpct: n? acc/n*100 : 0};
+  });
+}
+function tablaAgrupada(key, kPedida){
+  const vals = colNumerica(key).slice().sort((a,b)=>a-b);
+  const n = vals.length;
+  if(n === 0) return null;
+  const min = vals[0], max = vals[n-1];
+  let K = (kPedida && kPedida > 0)
+        ? Math.round(kPedida)
+        : Math.max(3, Math.min(10, Math.round(1 + 3.322*Math.log10(n))));
+  const rango = max - min;
+  let amp = rango / K;
+  if(!isFinite(amp) || amp <= 0){ amp = 1; K = 1; }
+  const lo0 = min;
+  const counts = new Array(K).fill(0);
+  vals.forEach(v=>{
+    let idx = Math.floor((v - lo0)/amp);
+    if(idx >= K) idx = K-1;
+    if(idx < 0) idx = 0;
+    counts[idx]++;
+  });
+  const filas = [];
+  let acc = 0;
+  for(let i=0;i<K;i++){
+    const lo = lo0 + i*amp;
+    const hi = lo0 + (i+1)*amp;
+    const fa = counts[i];
+    acc += fa;
+    filas.push({
+      lo, hi, marca:(lo+hi)/2, fa,
+      fr: fa/n, pct: fa/n*100,
+      Fa: acc, Fpct: acc/n*100,
+      label: n2(lo) + ' – ' + n2(hi)
+    });
+  }
+  return {filas, n, min, max, rango, amp, K, vals};
+}
+function descriptivos(key){
+  const raw = colNumerica(key);
+  const n = raw.length;
+  if(n === 0) return null;
+  const s = sortedNum(raw);
+  const m = mean(raw);
+  const med = percentile(s, 50);
+  const va = varianceS(raw);
+  const sd = Math.sqrt(va);
+  const moda = modaNum(raw);
+  return {
+    n, suma: raw.reduce((a,b)=>a+b,0), media:m, mediana:med,
+    moda, min:s[0], max:s[n-1], rango:s[n-1]-s[0],
+    varianza:va, sd, cv: m !== 0 ? (sd/Math.abs(m))*100 : NaN,
+    q1:percentile(s,25), q2:med, q3:percentile(s,75),
+    iqr:percentile(s,75)-percentile(s,25),
+    p10:percentile(s,10), p90:percentile(s,90),
+    sorted:s, raw
+  };
+}
+function tablaContingencia(key1, key2){
+  const filas = valoresUnicos(key1);
+  const cols = valoresUnicos(key2);
+  const mat = filas.map(()=>new Array(cols.length).fill(0));
+  DATA.forEach(r=>{
+    const i = filas.indexOf(String(r[key1]));
+    const j = cols.indexOf(String(r[key2]));
+    if(i >= 0 && j >= 0) mat[i][j]++;
+  });
+  const totFila = mat.map(f => f.reduce((a,b)=>a+b,0));
+  const totCol = cols.map((_,j) => mat.reduce((a,f)=>a+f[j],0));
+  const n = totFila.reduce((a,b)=>a+b,0);
+  if(n === 0) return null;
+  const esp = mat.map((f,i)=> f.map((_,j)=> totFila[i]*totCol[j]/n));
+  let chi2 = 0, celdasBajas = 0, totalCeldas = filas.length*cols.length, menorEsp = Infinity;
+  for(let i=0;i<filas.length;i++){
+    for(let j=0;j<cols.length;j++){
+      const O = mat[i][j], E = esp[i][j];
+      if(E > 0) chi2 += (O-E)*(O-E)/E;
+      if(E < 5) celdasBajas++;
+      if(E < menorEsp) menorEsp = E;
+    }
+  }
+  const gl = (filas.length-1)*(cols.length-1);
+  const p = gl > 0 ? chiP(chi2, gl) : NaN;
+  const minDim = Math.min(filas.length-1, cols.length-1);
+  const vCramer = minDim > 0 ? Math.sqrt(chi2/(n*minDim)) : NaN;
+  return {filas, cols, mat, esp, totFila, totCol, n, chi2, gl, p,
+          celdasBajas, totalCeldas, menorEsp, vCramer};
+}
+function analizarCorrelacion(xs, ys){
+  const n = xs.length;
+  if(n < 3) return {error:'Se necesitan al menos 3 pares de datos válidos.'};
+  const mx = mean(xs), my = mean(ys);
+  let sxy = 0, sxx = 0, syy = 0;
+  for(let i=0;i<n;i++){
+    const dx = xs[i]-mx, dy = ys[i]-my;
+    sxy += dx*dy; sxx += dx*dx; syy += dy*dy;
+  }
+  if(sxx === 0 || syy === 0){
+    return {error:'Una de las variables es constante en la base actual: la correlación no está definida.'};
+  }
+  const r = sxy/Math.sqrt(sxx*syy);
+  const b1 = sxy/sxx;
+  const b0 = my - b1*mx;
+  const r2 = r*r;
+  let t = NaN, p = NaN;
+  if(Math.abs(r) < 1 && n > 2){
+    t = r*Math.sqrt((n-2)/(1-r*r));
+    p = tP2(t, n-2);
+  }
+  return {n, r, b0, b1, r2, t, p, mx, my};
+}
+function interpretarR(r){
+  const a = Math.abs(r);
+  let inten;
+  if(a < 0.10) inten = 'prácticamente nula';
+  else if(a < 0.30) inten = 'débil';
+  else if(a < 0.60) inten = 'moderada';
+  else if(a < 0.80) inten = 'fuerte';
+  else inten = 'muy fuerte';
+  const dir = r > 0 ? 'positiva (directa)' : (r < 0 ? 'negativa (inversa)' : 'nula');
+  return {inten, dir};
+}
+
+/* =========================================================
+   5. GRÁFICOS (Canvas nativo)
+   ========================================================= */
+function clearCanvas(cv){
+  const dpr = window.devicePixelRatio || 1;
+  const rect = cv.getBoundingClientRect();
+  const w = Math.max(260, rect.width || cv.parentElement.clientWidth || 300);
+  const h = Math.max(200, rect.height || 300);
+  cv.width = Math.round(w*dpr);
+  cv.height = Math.round(h*dpr);
+  const ctx = cv.getContext('2d');
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.clearRect(0,0,w,h);
+  return {ctx, w, h};
+}
+function drawTitle(ctx, text, w){
+  ctx.fillStyle = '#245B70';
+  ctx.font = 'bold 13px Segoe UI, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'top';
+  ctx.fillText(text, w/2, 6);
+}
+function drawEmpty(ctx, w, h, msg){
+  ctx.fillStyle = '#94A3B8';
+  ctx.font = '13px Segoe UI, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(msg, w/2, h/2);
+}
+
+function drawBar(cv, labels, values, titulo){
+  const {ctx,w,h} = clearCanvas(cv);
+  drawTitle(ctx, titulo, w);
+  if(!values.length || values.every(v=>v===0)){ drawEmpty(ctx,w,h,'Sin datos'); return; }
+  const pad = {l:46, r:14, t:34, b:76};
+  const cw = w - pad.l - pad.r;
+  const ch = h - pad.t - pad.b;
+  if(cw <= 20 || ch <= 20){ drawEmpty(ctx,w,h,'Espacio insuficiente'); return; }
+  const maxV = Math.max(...values);
+  const top = niceCeil(maxV);
+
+  // Rejilla y eje Y
+  ctx.strokeStyle = '#E2E8F0';
+  ctx.lineWidth = 1;
+  ctx.font = '10px Segoe UI, sans-serif';
+  ctx.fillStyle = '#64748B';
+  for(let i=0;i<=5;i++){
+    const y = pad.t + ch - ch*i/5;
+    ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(pad.l+cw, y); ctx.stroke();
+    ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+    ctx.fillText(String(Math.round(top*i/5)), pad.l-6, y);
+  }
+  ctx.strokeStyle = '#94A3B8';
+  ctx.beginPath(); ctx.moveTo(pad.l, pad.t); ctx.lineTo(pad.l, pad.t+ch); ctx.lineTo(pad.l+cw, pad.t+ch); ctx.stroke();
+
+  const bw = cw / values.length;
+  const barW = Math.min(bw*0.68, 70);
+  values.forEach((v,i)=>{
+    const bh = (v/top)*ch;
+    const x = pad.l + i*bw + (bw - barW)/2;
+    const y = pad.t + ch - bh;
+    ctx.fillStyle = PALETA[i % PALETA.length];
+    ctx.fillRect(x, y, barW, Math.max(bh,0));
+    ctx.fillStyle = '#263238';
+    ctx.font = 'bold 10px Segoe UI, sans-serif';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+    if(bh > 12) ctx.fillText(String(v), x + barW/2, y - 3);
+
+    // Etiqueta X rotada
+    ctx.save();
+    ctx.translate(pad.l + i*bw + bw/2, pad.t + ch + 8);
+    ctx.rotate(-Math.PI/5.2);
+    ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+    ctx.fillStyle = '#263238';
+    ctx.font = '10px Segoe UI, sans-serif';
+    let lab = labels[i];
+    if(lab.length > 18) lab = lab.slice(0,17) + '…';
+    ctx.fillText(lab, 0, 0);
+    ctx.restore();
+  });
+}
+
+function drawPie(cv, labels, values, titulo){
+  const {ctx,w,h} = clearCanvas(cv);
+  drawTitle(ctx, titulo, w);
+  const total = values.reduce((a,b)=>a+b,0);
+  if(!total){ drawEmpty(ctx,w,h,'Sin datos'); return; }
+
+  const narrow = w < 520;
+  const cx = narrow ? w*0.30 : w*0.28;
+  const cy = h*0.58;
+  const R = Math.min(narrow ? w*0.25 : w*0.19, h*0.34);
+
+  let ang = -Math.PI/2;
+  values.forEach((v,i)=>{
+    const frac = v/total;
+    const a2 = ang + frac*Math.PI*2;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, R, ang, a2);
+    ctx.closePath();
+    ctx.fillStyle = PALETA[i % PALETA.length];
+    ctx.fill();
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    if(frac > 0.06){
+      const mid = ang + (a2-ang)/2;
+      const tx = cx + Math.cos(mid)*R*0.62;
+      const ty = cy + Math.sin(mid)*R*0.62;
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 10px Segoe UI, sans-serif';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(Math.round(frac*100) + '%', tx, ty);
+    }
+    ang = a2;
+  });
+
+  // Leyenda
+  const lx = narrow ? w*0.56 : w*0.53;
+  let ly = Math.max(46, h*0.22);
+  const lh = Math.min(19, (h - ly - 12)/Math.max(values.length,1));
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'middle';
+  labels.forEach((lab,i)=>{
+    if(ly > h - 8) return;
+    ctx.fillStyle = PALETA[i % PALETA.length];
+    ctx.fillRect(lx, ly-5, 10, 10);
+    ctx.fillStyle = '#263238';
+    ctx.font = '10.5px Segoe UI, sans-serif';
+    const pct = Math.round(values[i]/total*100);
+    let txt = lab + ' (' + pct + '%)';
+    if(txt.length > 24) txt = txt.slice(0,23) + '…';
+    ctx.fillText(txt, lx + 15, ly);
+    ly += lh;
+  });
+}
+
+function drawHistogram(cv, filas, titulo, varLabel){
+  const {ctx,w,h} = clearCanvas(cv);
+  drawTitle(ctx, titulo, w);
+  if(!filas.length){ drawEmpty(ctx,w,h,'Sin datos'); return; }
+  const pad = {l:46, r:14, t:34, b:82};
+  const cw = w - pad.l - pad.r;
+  const ch = h - pad.t - pad.b;
+  if(cw <= 20 || ch <= 20){ drawEmpty(ctx,w,h,'Espacio insuficiente'); return; }
+  const maxV = Math.max(...filas.map(f=>f.fa), 1);
+  const top = niceCeil(maxV);
+
+  ctx.strokeStyle = '#E2E8F0'; ctx.lineWidth = 1;
+  ctx.font = '10px Segoe UI, sans-serif';
+  for(let i=0;i<=5;i++){
+    const y = pad.t + ch - ch*i/5;
+    ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(pad.l+cw, y); ctx.stroke();
+    ctx.fillStyle = '#64748B';
+    ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+    ctx.fillText(String(Math.round(top*i/5)), pad.l-6, y);
+  }
+  ctx.strokeStyle = '#94A3B8';
+  ctx.beginPath(); ctx.moveTo(pad.l, pad.t); ctx.lineTo(pad.l, pad.t+ch); ctx.lineTo(pad.l+cw, pad.t+ch); ctx.stroke();
+
+  const bw = cw / filas.length;
+  filas.forEach((f,i)=>{
+    const bh = (f.fa/top)*ch;
+    const x = pad.l + i*bw;
+    const y = pad.t + ch - bh;
+    ctx.fillStyle = '#6B9B83';
+    ctx.fillRect(x+1, y, bw-2, Math.max(bh,0));
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(x+1, y, bw-2, Math.max(bh,0));
+
+    if(f.fa > 0){
+      ctx.fillStyle = '#263238';
+      ctx.font = 'bold 10px Segoe UI, sans-serif';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+      ctx.fillText(String(f.fa), x + bw/2, y - 2);
+    }
+
+    ctx.save();
+    ctx.translate(x + bw/2, pad.t + ch + 8);
+    ctx.rotate(-Math.PI/4);
+    ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+    ctx.fillStyle = '#64748B';
+    ctx.font = '9.5px Segoe UI, sans-serif';
+    ctx.fillText(f.label, 0, 0);
+    ctx.restore();
+  });
+
+  // Etiqueta eje X
+  ctx.fillStyle = '#64748B';
+  ctx.font = '10px Segoe UI, sans-serif';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+  ctx.fillText(varLabel, pad.l + cw/2, h - 4);
+}
+
+function drawPolygon(cv, filas, titulo, varLabel){
+  const {ctx,w,h} = clearCanvas(cv);
+  drawTitle(ctx, titulo, w);
+  if(!filas.length){ drawEmpty(ctx,w,h,'Sin datos'); return; }
+  const pad = {l:46, r:20, t:34, b:82};
+  const cw = w - pad.l - pad.r;
+  const ch = h - pad.t - pad.b;
+  if(cw <= 20 || ch <= 20){ drawEmpty(ctx,w,h,'Espacio insuficiente'); return; }
+  const maxV = Math.max(...filas.map(f=>f.fa), 1);
+  const top = niceCeil(maxV);
+
+  ctx.strokeStyle = '#E2E8F0'; ctx.lineWidth = 1;
+  ctx.font = '10px Segoe UI, sans-serif';
+  for(let i=0;i<=5;i++){
+    const y = pad.t + ch - ch*i/5;
+    ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(pad.l+cw, y); ctx.stroke();
+    ctx.fillStyle = '#64748B';
+    ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+    ctx.fillText(String(Math.round(top*i/5)), pad.l-6, y);
+  }
+  ctx.strokeStyle = '#94A3B8';
+  ctx.beginPath(); ctx.moveTo(pad.l, pad.t); ctx.lineTo(pad.l, pad.t+ch); ctx.lineTo(pad.l+cw, pad.t+ch); ctx.stroke();
+
+  const step = filas.length > 1 ? cw/(filas.length-1) : cw;
+  const pts = filas.map((f,i)=>({
+    x: pad.l + (filas.length > 1 ? i*step : cw/2),
+    y: pad.t + ch - (f.fa/top)*ch,
+    fa: f.fa,
+    label: f.label
+  }));
+
+  // Área suave
+  ctx.beginPath();
+  ctx.moveTo(pts[0].x, pad.t+ch);
+  pts.forEach(p=>ctx.lineTo(p.x, p.y));
+  ctx.lineTo(pts[pts.length-1].x, pad.t+ch);
+  ctx.closePath();
+  ctx.fillStyle = 'rgba(107,155,131,0.18)';
+  ctx.fill();
+
+  // Línea
+  ctx.beginPath();
+  pts.forEach((p,i)=> i ? ctx.lineTo(p.x,p.y) : ctx.moveTo(p.x,p.y));
+  ctx.strokeStyle = '#245B70';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  // Puntos
+  pts.forEach(p=>{
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 3.6, 0, Math.PI*2);
+    ctx.fillStyle = '#245B70';
+    ctx.fill();
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.2; ctx.stroke();
+    if(p.fa > 0){
+      ctx.fillStyle = '#263238';
+      ctx.font = 'bold 10px Segoe UI, sans-serif';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+      ctx.fillText(String(p.fa), p.x, p.y - 7);
+    }
+  });
+
+  // Etiquetas X
+  pts.forEach(p=>{
+    ctx.save();
+    ctx.translate(p.x, pad.t + ch + 8);
+    ctx.rotate(-Math.PI/4);
+    ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+    ctx.fillStyle = '#64748B';
+    ctx.font = '9.5px Segoe UI, sans-serif';
+    ctx.fillText(p.label, 0, 0);
+    ctx.restore();
+  });
+
+  ctx.fillStyle = '#64748B';
+  ctx.font = '10px Segoe UI, sans-serif';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+  ctx.fillText(varLabel, pad.l + cw/2, h - 4);
+}
+
+function drawScatter(cv, xs, ys, b0, b1, xLab, yLab, titulo){
+  const {ctx,w,h} = clearCanvas(cv);
+  drawTitle(ctx, titulo, w);
+  if(xs.length < 2){ drawEmpty(ctx,w,h,'Se necesitan al menos 2 pares de datos'); return; }
+  const pad = {l:56, r:18, t:36, b:56};
+  const cw = w - pad.l - pad.r;
+  const ch = h - pad.t - pad.b;
+  if(cw <= 20 || ch <= 20){ drawEmpty(ctx,w,h,'Espacio insuficiente'); return; }
+
+  let xmin = Math.min(...xs), xmax = Math.max(...xs);
+  let ymin = Math.min(...ys), ymax = Math.max(...ys);
+  if(xmax === xmin){ xmax = xmin + 1; }
+  if(ymax === ymin){ ymax = ymin + 1; }
+  const xPad = (xmax-xmin)*0.08, yPad = (ymax-ymin)*0.08;
+  xmin -= xPad; xmax += xPad; ymin -= yPad; ymax += yPad;
+
+  const sx = v => pad.l + ((v-xmin)/(xmax-xmin))*cw;
+  const sy = v => pad.t + ch - ((v-ymin)/(ymax-ymin))*ch;
+
+  // Rejilla
+  ctx.strokeStyle = '#EDF2F7'; ctx.lineWidth = 1;
+  ctx.font = '10px Segoe UI, sans-serif';
+  for(let i=0;i<=5;i++){
+    const yv = ymin + (ymax-ymin)*i/5;
+    const y = sy(yv);
+    ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(pad.l+cw, y); ctx.stroke();
+    ctx.fillStyle = '#64748B';
+    ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+    ctx.fillText(n1(yv), pad.l-6, y);
+  }
+  for(let i=0;i<=5;i++){
+    const xv = xmin + (xmax-xmin)*i/5;
+    const x = sx(xv);
+    ctx.beginPath(); ctx.moveTo(x, pad.t); ctx.lineTo(x, pad.t+ch); ctx.stroke();
+    ctx.fillStyle = '#64748B';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    ctx.fillText(n1(xv), x, pad.t+ch+6);
+  }
+  ctx.strokeStyle = '#94A3B8';
+  ctx.beginPath(); ctx.moveTo(pad.l, pad.t); ctx.lineTo(pad.l, pad.t+ch); ctx.lineTo(pad.l+cw, pad.t+ch); ctx.stroke();
+
+  // Puntos
+  for(let i=0;i<xs.length;i++){
+    ctx.beginPath();
+    ctx.arc(sx(xs[i]), sy(ys[i]), 3.6, 0, Math.PI*2);
+    ctx.fillStyle = 'rgba(36,91,112,0.62)';
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(36,91,112,0.9)';
+    ctx.lineWidth = 0.8;
+    ctx.stroke();
+  }
+
+  // Recta de regresión
+  if(isFinite(b0) && isFinite(b1)){
+    const x1 = xmin, x2 = xmax;
+    const y1 = b0 + b1*x1, y2 = b0 + b1*x2;
+    ctx.beginPath();
+    ctx.moveTo(sx(x1), sy(y1));
+    ctx.lineTo(sx(x2), sy(y2));
+    ctx.strokeStyle = '#C0574F';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([6,4]);
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  // Etiquetas de ejes
+  ctx.fillStyle = '#245B70';
+  ctx.font = 'bold 10.5px Segoe UI, sans-serif';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+  ctx.fillText(xLab, pad.l + cw/2, h - 6);
+  ctx.save();
+  ctx.translate(12, pad.t + ch/2);
+  ctx.rotate(-Math.PI/2);
+  ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+  ctx.fillText(yLab, 0, 0);
+  ctx.restore();
+}
+
+/* =========================================================
+   6. RENDERIZADO
+   ========================================================= */
+let sortKey = 'id';
+let sortDir = 1;
+
+/* ---------- 6.1 KPIs de inicio ---------- */
+function renderKPIs(){
+  const grid = document.getElementById('kpiGrid');
+  const n = DATA.length;
+  const prom = colNumerica('promedio');
+  const hIA = colNumerica('horasIA');
+  const hEst = colNumerica('horasEstudio');
+  const parejas = DATA.map(r => [Number(r.horasIA), Number(r.promedio)])
+                       .filter(p => isFinite(p[0]) && isFinite(p[1]));
+  const corr = analizarCorrelacion(parejas.map(p=>p[0]), parejas.map(p=>p[1]));
+  const pctMejoro = n ? (DATA.filter(r=>r.percepcion === 'Mejoró').length / n * 100) : 0;
+
+  const items = [
+    {v: n, l:'Registros en la base'},
+    {v: n2(mean(prom)), l:'Promedio medio (0-20)'},
+    {v: n1(mean(hIA)) + ' h', l:'Horas de IA / semana (media)'},
+    {v: n1(mean(hEst)) + ' h', l:'Horas de estudio sin IA (media)'},
+    {v: corr.error ? '—' : n3(corr.r), l:'r de Pearson (IA ↔ promedio)'},
+    {v: n1(pctMejoro) + ' %', l:'Perciben que su rendimiento mejoró'}
+  ];
+  grid.innerHTML = items.map(it =>
+    `<div class="kpi"><div class="val">${esc(it.v)}</div><div class="lbl">${esc(it.l)}</div></div>`
+  ).join('');
+}
+
+/* ---------- 6.2 Cuestionario ---------- */
+const PREGUNTAS = [
+  {q:'¿Cuál es tu edad?', v:'edad', tipo:'Cuantitativa discreta', cod:'Años cumplidos (15–70)'},
+  {q:'¿Con qué sexo te identificas?', v:'sexo', tipo:'Cualitativa nominal', cod:'Femenino / Masculino'},
+  {q:'¿A qué área de estudios perteneces?', v:'carrera', tipo:'Cualitativa nominal', cod:'Ingeniería / Ciencias de la Salud / Ciencias Sociales / Artes y Humanidades / Ciencias Económicas'},
+  {q:'¿Cuántas horas a la semana usas herramientas de IA para tus estudios?', v:'horasIA', tipo:'Cuantitativa continua', cod:'Horas por semana (0–30), un decimal'},
+  {q:'¿Con qué frecuencia usas herramientas de IA?', v:'frecuenciaIA', tipo:'Cualitativa ordinal', cod:'Nunca &lt; Rara vez &lt; A veces &lt; Frecuente &lt; Muy frecuente'},
+  {q:'¿Cuál es la herramienta de IA que más utilizas?', v:'herramienta', tipo:'Cualitativa nominal', cod:'ChatGPT / Copilot / Gemini / Claude / Otra'},
+  {q:'¿Para qué propósito principal usas la IA?', v:'proposito', tipo:'Cualitativa nominal', cod:'Resúmenes / Resolución de problemas / Redacción / Programación / Preparación de exámenes'},
+  {q:'¿Cuánto confías en las respuestas de la IA?', v:'confianza', tipo:'Ordinal (escala Likert)', cod:'1 = nada … 5 = totalmente'},
+  {q:'¿Cuál es tu promedio académico del último ciclo?', v:'promedio', tipo:'Cuantitativa continua', cod:'Escala 0–20, un decimal'},
+  {q:'¿Cuántas horas a la semana estudias sin ayuda de IA?', v:'horasEstudio', tipo:'Cuantitativa continua', cod:'Horas por semana (0–40), un decimal'},
+  {q:'¿Cómo percibes que el uso de IA afectó tu rendimiento académico?', v:'percepcion', tipo:'Cualitativa ordinal', cod:'Empeoró &lt; Se mantuvo igual &lt; Mejoró'},
+  {q:'¿Citas las fuentes cuando usas contenido generado por IA?', v:'usoEtico', tipo:'Cualitativa ordinal', cod:'Nunca cita &lt; A veces cita &lt; Siempre cita'},
+  {q:'¿Qué tan satisfecho estás con los resultados que obtienes de la IA?', v:'satisfaccion', tipo:'Ordinal (escala Likert)', cod:'1 = nada satisfecho … 5 = totalmente satisfecho'}
+];
+function renderCuestionario(){
+  const tb = document.getElementById('tbodyCuestionario');
+  tb.innerHTML = PREGUNTAS.map((p,i)=>{
+    const badge = p.tipo.startsWith('Cuant') ? 'b-cuant' : (p.tipo.includes('ordinal') || p.tipo.includes('Ordinal') ? 'b-ord' : 'b-cual');
+    return `<tr>
+      <td><span class="q-num">${i+1}</span></td>
+      <td style="white-space:normal;min-width:220px">${p.q}</td>
+      <td><code>${esc(p.v)}</code></td>
+      <td><span class="badge ${badge}">${esc(p.tipo)}</span></td>
+      <td style="white-space:normal;min-width:190px">${p.cod}</td>
+    </tr>`;
+  }).join('');
+}
+
+/* ---------- 6.3 Base de datos ---------- */
+function renderTabla(){
+  const thead = document.getElementById('theadDatos');
+  const tbody = document.getElementById('tbodyDatos');
+
+  const arrow = k => sortKey === k ? (sortDir > 0 ? ' ▲' : ' ▼') : '';
+  thead.innerHTML = COLS.map(k =>
+    `<th class="sortable" data-key="${k}">${esc(VARS[k].label)}${arrow(k)}</th>`
+  ).join('') + '<th class="no-print">Acción</th>';
+
+  thead.querySelectorAll('th.sortable').forEach(th=>{
+    th.addEventListener('click', ()=>{
+      const k = th.dataset.key;
+      if(sortKey === k) sortDir *= -1;
+      else { sortKey = k; sortDir = 1; }
+      renderTabla();
+    });
+  });
+
+  const q = document.getElementById('filtroTexto').value.trim().toLowerCase();
+  const fc = document.getElementById('filtroCarrera').value;
+  const fp = document.getElementById('filtroPercepcion').value;
+
+  let rows = DATA.slice();
+  if(q) rows = rows.filter(r => COLS.some(k => String(r[k]).toLowerCase().includes(q)));
+  if(fc) rows = rows.filter(r => r.carrera === fc);
+  if(fp) rows = rows.filter(r => r.percepcion === fp);
+
+  if(sortKey){
+    rows.sort((a,b)=>{
+      const va = a[sortKey], vb = b[sortKey];
+      if(typeof va === 'number' && typeof vb === 'number') return (va-vb)*sortDir;
+      return String(va).localeCompare(String(vb), 'es') * sortDir;
+    });
+  }
+
+  if(!rows.length){
+    tbody.innerHTML = `<tr><td colspan="${COLS.length+1}" style="text-align:center;color:#94A3B8;padding:1.2rem">No hay registros que coincidan con los filtros.</td></tr>`;
+  } else {
+    tbody.innerHTML = rows.map(r=>{
+      const celdas = COLS.map(k=>{
+        const val = r[k];
+        if(k === 'horasIA' || k === 'promedio' || k === 'horasEstudio') return `<td>${n1(Number(val))}</td>`;
+        return `<td>${esc(val)}</td>`;
+      }).join('');
+      return `<tr data-id="${r.id}">${celdas}<td class="no-print"><button class="btn danger sm" data-del="${r.id}">✕</button></td></tr>`;
+    }).join('');
+  }
+
+  tbody.querySelectorAll('button[data-del]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const id = Number(btn.dataset.del);
+      DATA = DATA.filter(r => r.id !== id);
+      actualizarTodo();
+    });
+  });
+
+  const info = document.getElementById('infoTabla');
+  info.textContent = `Mostrando ${rows.length} de ${DATA.length} registros. Haz clic en los encabezados para ordenar.`;
+}
+
+/* ---------- 6.4 Frecuencias ---------- */
+function renderFrecuencias(){
+  // Cualitativa
+  const keyC = document.getElementById('selFrecCual').value;
+  const filas = tablaFrecuenciaCual(keyC);
+  const tb = document.getElementById('tbodyFrecCual');
+  const nTotal = DATA.length;
+
+  if(!filas.length || nTotal === 0){
+    tb.innerHTML = `<tr><td colspan="7" style="text-align:center;color:#94A3B8">Sin datos</td></tr>`;
+  } else {
+    tb.innerHTML = filas.map(f=>`<tr>
+      <td>${esc(f.cat)}</td>
+      <td>${f.fa}</td>
+      <td>${n3(f.fr)}</td>
+      <td>${n1(f.pct)} %</td>
+      <td>${f.Fa}</td>
+      <td>${n3(f.Fr)}</td>
+      <td>${n1(f.Fpct)} %</td>
+    </tr>`).join('') + `<tr style="font-weight:700;background:#EAF1F4">
+      <td>Total</td><td>${nTotal}</td><td>1.000</td><td>100.0 %</td><td>—</td><td>—</td><td>—</td></tr>`;
+  }
+
+  const maxF = filas.reduce((a,b)=> b.fa > a.fa ? b : a, filas[0] || {cat:'—', fa:0, pct:0});
+  document.getElementById('interpFrecCual').innerHTML =
+    `<strong>¿Cómo se interpreta?</strong> La variable <b>${esc(VARS[keyC].label)}</b> tiene ${filas.length} categorías observadas en ${nTotal} casos.
+     La categoría más frecuente es <b>${esc(maxF.cat)}</b>, con ${maxF.fa} casos (${n1(maxF.pct)} %).
+     La columna <b>f<sub>r</sub></b> es la proporción sobre el total (todas suman 1) y <b>%</b> es esa proporción multiplicada por 100.
+     Las columnas <b>F<sub>a</sub></b> y <b>% acumulado</b> solo son interpretables si la variable tiene orden natural${['sexo','carrera','herramienta','proposito'].includes(keyC) ? '; en este caso la variable es nominal, por lo que el acumulado es solo informativo' : ''}.
+     Esta tabla responde a la pregunta: <i>¿cómo se distribuye la muestra en esta característica?</i> No dice nada sobre si esa característica se relaciona con otra variable: para eso se usa el chi-cuadrado de la sección de pruebas.`;
+
+  // Cuantitativa agrupada
+  const keyQ = document.getElementById('selFrecCuant').value;
+  const kPedida = Number(document.getElementById('inputK').value) || 0;
+  const g = tablaAgrupada(keyQ, kPedida);
+  const tq = document.getElementById('tbodyFrecCuant');
+  const info = document.getElementById('infoIntervalos');
+
+  if(!g){
+    tq.innerHTML = `<tr><td colspan="7" style="text-align:center;color:#94A3B8">Sin datos</td></tr>`;
+    info.textContent = '';
+    document.getElementById('interpFrecCuant').innerHTML = '';
+    return;
+  }
+
+  tq.innerHTML = g.filas.map(f=>`<tr>
+    <td>${esc(f.label)}</td>
+    <td>${n2(f.marca)}</td>
+    <td>${f.fa}</td>
+    <td>${n3(f.fr)}</td>
+    <td>${n1(f.pct)} %</td>
+    <td>${f.Fa}</td>
+    <td>${n1(f.Fpct)} %</td>
+  </tr>`).join('') + `<tr style="font-weight:700;background:#EAF1F4">
+    <td>Total</td><td>—</td><td>${g.n}</td><td>1.000</td><td>100.0 %</td><td>—</td><td>—</td></tr>`;
+
+  info.innerHTML = `n = ${g.n} · mínimo = ${n2(g.min)} · máximo = ${n2(g.max)} · rango = ${n2(g.rango)} · amplitud = ${n2(g.amp)} · k = ${g.K} intervalos ${kPedida > 0 ? '(fijados por el usuario)' : '(regla de Sturges)'}.`;
+
+  const maxI = g.filas.reduce((a,b)=> b.fa > a.fa ? b : a, g.filas[0]);
+  document.getElementById('interpFrecCuant').innerHTML =
+    `<strong>¿Cómo se interpreta?</strong> La variable <b>${esc(VARS[keyQ].label)}</b> se agrupó en ${g.K} intervalos de amplitud ${n2(g.amp)}.
+     El intervalo más frecuente es <b>${esc(maxI.label)}</b>, con ${maxI.fa} casos (${n1(maxI.pct)} %).
+     La <b>marca de clase</b> (${n2(maxI.marca)}) es el punto medio del intervalo y representa a todos los valores que caen dentro de él; es la base del histograma y del polígono de frecuencias.
+     La columna <b>F<sub>a</sub></b> indica cuántos casos acumulan ese intervalo y todos los anteriores: en el último intervalo debe coincidir con n (${g.n}).
+     <br><br><b>Limitación:</b> al agrupar se pierde la información individual. La media, la varianza y la correlación de esta aplicación se calculan con los datos sin agrupar, que son más exactos. Si cambias el número de intervalos, las frecuencias cambian aunque los datos sean los mismos: eso demuestra que la agrupación es una decisión del analista, no una propiedad de los datos.`;
+}
+
+/* ---------- 6.5 Descriptiva ---------- */
+function renderDescriptiva(){
+  const key = document.getElementById('selDesc').value;
+  const d = descriptivos(key);
+  const tb = document.getElementById('tbodyDesc');
+  const box = document.getElementById('boxDescResumen');
+  const interp = document.getElementById('interpDesc');
+
+  if(!d || d.n === 0){
+    tb.innerHTML = `<tr><td colspan="2" style="text-align:center;color:#94A3B8">Sin datos</td></tr>`;
+    box.innerHTML = '';
+    interp.innerHTML = '';
+    return;
+  }
+
+  const modaTxt = d.moda.count <= 1
+    ? 'No hay moda (todos los valores aparecen una vez)'
+    : (d.moda.unica ? n2(d.moda.vals[0]) : 'Multimodal: ' + d.moda.vals.map(v=>n2(v)).join(', '));
+
+  const filas = [
+    ['n (casos válidos)', d.n],
+    ['Suma', n2(d.suma)],
+    ['Media', n4(d.media)],
+    ['Mediana', n4(d.mediana)],
+    ['Moda', modaTxt],
+    ['Mínimo', n2(d.min)],
+    ['Máximo', n2(d.max)],
+    ['Rango', n2(d.rango)],
+    ['Varianza muestral (s²)', n4(d.varianza)],
+    ['Desviación estándar muestral (s)', n4(d.sd)],
+    ['Coeficiente de variación (CV %)', isFinite(d.cv) ? n1(d.cv) + ' %' : '—'],
+    ['Percentil 10 (P10)', n3(d.p10)],
+    ['Cuartil 1 (Q1)', n3(d.q1)],
+    ['Cuartil 2 = Mediana (Q2)', n3(d.q2)],
+    ['Cuartil 3 (Q3)', n3(d.q3)],
+    ['Rango intercuartílico (Q3 − Q1)', n3(d.iqr)],
+    ['Percentil 90 (P90)', n3(d.p90)]
+  ];
+
+  tb.innerHTML = filas.map(f=>`<tr><td>${esc(f[0])}</td><td><b>${esc(f[1])}</b></td></tr>`).join('');
+
+  const asim = d.media > d.mediana + 0.001 ? 'positiva (cola hacia la derecha)'
+             : (d.media < d.mediana - 0.001 ? 'negativa (cola hacia la izquierda)' : 'aproximadamente simétrica');
+  const disp = isFinite(d.cv) ? (d.cv < 15 ? 'baja' : (d.cv < 30 ? 'moderada' : 'alta')) : 'no calculable';
+
+  box.innerHTML = `
+    <div><span class="big">${n2(d.media)}</span> <span class="small">media · mediana ${n2(d.mediana)} · s = ${n2(d.sd)}</span></div>
+    <div class="small" style="margin-top:.35rem">Distribución ${asim}. Dispersión relativa ${disp} (CV = ${isFinite(d.cv)?n1(d.cv)+' %':'—'}).</div>
+    <div class="small" style="margin-top:.35rem">El 50 % central de los casos se ubica entre ${n2(d.q1)} y ${n2(d.q3)}.</div>`;
+
+  interp.innerHTML =
+    `<strong>¿Cómo se interpreta?</strong> Para la variable <b>${esc(VARS[key].label)}</b>, el valor promedio es <b>${n4(d.media)}</b>, mientras que el valor que divide a la muestra en dos mitades iguales (mediana) es <b>${n4(d.mediana)}</b>.
+     ${Math.abs(d.media - d.mediana) < 0.15 * (d.sd || 1)
+        ? 'Como la media y la mediana son muy parecidas, la distribución es aproximadamente simétrica y ambas pueden usarse como medida de tendencia central.'
+        : 'La diferencia entre media y mediana sugiere asimetría: la media es arrastrada por los valores extremos, por lo que la mediana es una medida más robusta en este caso.'}
+     La desviación estándar (<b>${n4(d.sd)}</b>) indica cuánto se alejan típicamente los casos respecto de la media, en las mismas unidades de la variable.
+     El coeficiente de variación (${isFinite(d.cv)?n1(d.cv)+' %':'—'}) permite comparar esta dispersión con la de otras variables de escala distinta: se considera dispersión alta por encima del 30 %.
+     El rango intercuartílico (<b>${n3(d.iqr)}</b>) contiene al 50 % central de los casos y es menos sensible a los valores atípicos que el rango.
+     <br><br><b>Limitación:</b> estas medidas resumen la distribución, pero no muestran su forma. Dos bases distintas pueden tener la misma media y la misma desviación estándar y distribuciones completamente diferentes; por eso conviene revisar también el histograma.`;
+}
+
+/* ---------- 6.6 Pruebas ---------- */
+function renderChi(){
+  const k1 = document.getElementById('selChi1').value;
+  const k2 = document.getElementById('selChi2').value;
+  const t = tablaContingencia(k1, k2);
+  const tablaEl = document.getElementById('tablaContingencia');
+  const tablaEsp = document.getElementById('tablaEsperadas');
+  const box = document.getElementById('boxChi');
+  const interp = document.getElementById('interpChi');
+  const hip = document.getElementById('txtHipotesis');
+
+  if(!t || t.filas.length < 2 || t.cols.length < 2){
+    tablaEl.querySelector('thead').innerHTML = '';
+    tablaEl.querySelector('tbody').innerHTML = `<tr><td style="color:#94A3B8">Se necesitan al menos dos categorías en cada variable para aplicar chi-cuadrado.</td></tr>`;
+    tablaEl.querySelector('tfoot').innerHTML = '';
+    tablaEsp.querySelector('thead').innerHTML = '';
+    tablaEsp.querySelector('tbody').innerHTML = '';
+    box.innerHTML = '';
+    interp.innerHTML = '';
+    hip.textContent = '';
+    return;
+  }
+
+  hip.innerHTML = `<b>H<sub>0</sub>:</b> «${esc(VARS[k1].label)}» y «${esc(VARS[k2].label)}» son independientes (no hay asociación).<br>
+                   <b>H<sub>1</sub>:</b> existe asociación entre «${esc(VARS[k1].label)}» y «${esc(VARS[k2].label)}».<br>
+                   Nivel de significación: α = 0.05.`;
+
+  // Observadas
+  tablaEl.querySelector('thead').innerHTML =
+    `<tr><th>${esc(VARS[k1].label)} \\ ${esc(VARS[k2].label)}</th>` +
+    t.cols.map(c=>`<th>${esc(c)}</th>`).join('') + '<th>Total</th></tr>';
+  tablaEl.querySelector('tbody').innerHTML = t.filas.map((f,i)=>
+    `<tr><td><b>${esc(f)}</b></td>` +
+    t.mat[i].map(v=>`<td>${v}</td>`).join('') +
+    `<td><b>${t.totFila[i]}</b></td></tr>`
+  ).join('');
+  tablaEl.querySelector('tfoot').innerHTML =
+    `<tr style="background:#EAF1F4;font-weight:700"><td>Total</td>` +
+    t.totCol.map(v=>`<td>${v}</td>`).join('') + `<td>${t.n}</td></tr>`;
+
+  // Esperadas
+  tablaEsp.querySelector('thead').innerHTML =
+    `<tr><th>Frecuencia esperada (E)</th>` +
+    t.cols.map(c=>`<th>${esc(c)}</th>`).join('') + '<th>Total</th></tr>';
+  tablaEsp.querySelector('tbody').innerHTML = t.filas.map((f,i)=>
+    `<tr><td><b>${esc(f)}</b></td>` +
+    t.esp[i].map(v=>`<td style="color:${v<5?'#A34640':'#263238'}">${n2(v)}</td>`).join('') +
+    `<td><b>${t.totFila[i]}</b></td></tr>`
+  ).join('');
+
+  const pctBajas = t.celdasBajas / t.totalCeldas * 100;
+  const supOK = pctBajas <= 20 && t.menorEsp >= 1;
+  const significativo = isFinite(t.p) && t.p < 0.05;
+
+  box.innerHTML = `
+    <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(120px,1fr))">
+      <div><div class="small">Estadístico χ²</div><div class="big">${n3(t.chi2)}</div></div>
+      <div><div class="small">Grados de libertad</div><div class="big">${t.gl}</div></div>
+      <div><div class="small">Valor p</div><div class="big">${pFmt(t.p)}</div></div>
+      <div><div class="small">V de Cramér</div><div class="big">${n3(t.vCramer)}</div></div>
+      <div><div class="small">n</div><div class="big">${t.n}</div></div>
+    </div>
+    <div style="margin-top:.6rem;font-weight:700;color:${significativo?'#245B70':'#64748B'}">
+      Decisión: ${significativo
+        ? 'se rechaza H₀ — hay evidencia estadística de asociación (p &lt; 0.05).'
+        : 'no se rechaza H₀ — no hay evidencia suficiente de asociación (p ≥ 0.05).'}
+    </div>`;
+
+  interp.innerHTML =
+    `<strong>¿Cómo se interpreta?</strong> El estadístico χ² = <b>${n3(t.chi2)}</b> con ${t.gl} grados de libertad produce un valor p = <b>${pFmt(t.p)}</b>.
+     ${significativo
+        ? 'Como p &lt; 0.05, se rechaza la hipótesis de independencia: la distribución de «' + esc(VARS[k2].label) + '» cambia según la categoría de «' + esc(VARS[k1].label) + '». Es decir, existe una asociación estadísticamente significativa entre ambas variables en esta muestra.'
+        : 'Como p ≥ 0.05, no hay evidencia suficiente para afirmar que las dos variables estén asociadas. Esto no demuestra que sean independientes: simplemente los datos observados son compatibles con la independencia.'}
+     La <b>V de Cramér</b> (${n3(t.vCramer)}) mide el tamaño del efecto: valores cercanos a 0 indican asociación trivial y cercanos a 1 asociación muy intensa, independientemente de n.
+     <br><br><b>Revisión de supuestos:</b> ${t.celdasBajas} de ${t.totalCeldas} celdas (${n1(pctBajas)} %) tienen frecuencia esperada menor que 5, y la menor esperada es ${n2(t.menorEsp)}.
+     ${supOK
+        ? 'El supuesto se cumple (menos del 20 % de celdas con E &lt; 5 y ninguna con E &lt; 1), por lo que la aproximación chi-cuadrado es aceptable.'
+        : 'El supuesto <b>no</b> se cumple: conviene agrupar categorías con pocos casos o interpretar el resultado con mucha cautela; con celdas de baja frecuencia la prueba pierde validez.'}
+     <br><br><b>Limitaciones:</b> el chi-cuadrado detecta asociación, no causalidad ni dirección; además es sensible al tamaño de la muestra. Con muestras grandes, asociaciones irrelevantes pueden resultar “significativas”. Por eso debe leerse junto con la V de Cramér y con la tabla de porcentajes por fila.`;
+}
+
+function renderCorrYReg(){
+  const kx = document.getElementById('selCorrX').value;
+  const ky = document.getElementById('selCorrY').value;
+  const boxC = document.getElementById('boxCorr');
+  const intC = document.getElementById('interpCorr');
+  const boxR = document.getElementById('boxReg');
+  const tbR = document.getElementById('tbodyReg');
+  const intR = document.getElementById('interpReg');
+
+  const pares = DATA.map(r => [Number(r[kx]), Number(r[ky])])
+                    .filter(p => isFinite(p[0]) && isFinite(p[1]));
+  const xs = pares.map(p=>p[0]);
+  const ys = pares.map(p=>p[1]);
+
+  if(kx === ky){
+    boxC.innerHTML = `<span style="color:#A34640">Selecciona dos variables distintas para calcular la correlación.</span>`;
+    intC.innerHTML = '';
+    boxR.innerHTML = '';
+    tbR.innerHTML = '';
+    intR.innerHTML = '';
+    return;
+  }
+
+  const res = analizarCorrelacion(xs, ys);
+
+  if(res.error){
+    boxC.innerHTML = `<span style="color:#A34640">${esc(res.error)}</span>`;
+    intC.innerHTML = '';
+    boxR.innerHTML = `<span style="color:#A34640">No es posible estimar la regresión: ${esc(res.error)}</span>`;
+    tbR.innerHTML = '';
+    intR.innerHTML = '';
+    return;
+  }
+
+  const {r, r2, b0, b1, n, p} = res;
+  const it = interpretarR(r);
+
+  boxC.innerHTML = `
+    <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(120px,1fr))">
+      <div><div class="small">Coeficiente r</div><div class="big">${n4(r)}</div></div>
+      <div><div class="small">r² (varianza compartida)</div><div class="big">${n4(r2)}</div></div>
+      <div><div class="small">Valor p (bilateral)</div><div class="big">${pFmt(p)}</div></div>
+      <div><div class="small">Pares válidos (n)</div><div class="big">${n}</div></div>
+    </div>
+    <div class="small" style="margin-top:.5rem">Dirección: ${it.dir} · Intensidad: ${it.inten}.</div>`;
+
+  intC.innerHTML =
+    `<strong>¿Cómo se interpreta?</strong> El coeficiente de Pearson entre <b>${esc(VARS[kx].label)}</b> y <b>${esc(VARS[ky].label)}</b> es r = <b>${n4(r)}</b>.
+     Esto indica una relación lineal <b>${it.dir}</b> de intensidad <b>${it.inten}</b>: ${r >= 0
+        ? 'cuando una variable aumenta, la otra tiende a aumentar también'
+        : 'cuando una variable aumenta, la otra tiende a disminuir'}.
+     El valor r² = ${n4(r2)} significa que aproximadamente el <b>${n1(r2*100)} %</b> de la variabilidad de «${esc(VARS[ky].label)}» se asocia linealmente con «${esc(VARS[kx].label)}» en esta muestra.
+     ${isFinite(p) ? (p < 0.05
+        ? 'El valor p = ' + pFmt(p) + ' &lt; 0.05, por lo que la correlación es estadísticamente significativa al 5 %: es poco probable que un r de esta magnitud aparezca por azar si en la población no existiera relación lineal.'
+        : 'El valor p = ' + pFmt(p) + ' ≥ 0.05, por lo que la correlación <b>no</b> es estadísticamente significativa: el r observado podría deberse al azar del muestreo.') : ''}
+     <br><br><b>Limitaciones:</b> r mide únicamente relación <b>lineal</b>; puede ser 0 aunque exista una relación curva fuerte. Es muy sensible a valores atípicos y a la restricción del rango. Y, sobre todo, <b>una correlación no demuestra causalidad</b>: podría existir una tercera variable (motivación, tiempo disponible, tipo de carrera) que explique ambas, o la relación podría ir en la dirección opuesta.`;
+
+  // Regresión
+  boxR.innerHTML = `
+    <div class="formula">Ŷ = ${n3(b0)} + ${n3(b1)} · X</div>
+    <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(120px,1fr));margin-top:.6rem">
+      <div><div class="small">Intercepto (b₀)</div><div class="big">${n4(b0)}</div></div>
+      <div><div class="small">Pendiente (b₁)</div><div class="big">${n4(b1)}</div></div>
+      <div><div class="small">R²</div><div class="big">${n4(r2)}</div></div>
+      <div><div class="small">n</div><div class="big">${n}</div></div>
+    </div>`;
+
+  const mostrar = Math.min(pares.length, 15);
+  const filasR = [];
+  for(let i=0;i<mostrar;i++){
+    const yhat = b0 + b1*xs[i];
+    filasR.push(`<tr>
+      <td>${i+1}</td>
+      <td>${n2(xs[i])}</td>
+      <td>${n2(ys[i])}</td>
+      <td>${n2(yhat)}</td>
+      <td>${n2(ys[i]-yhat)}</td>
+    </tr>`);
+  }
+  tbR.innerHTML = filasR.join('') ||
+    `<tr><td colspan="5" style="text-align:center;color:#94A3B8">Sin datos</td></tr>`;
+
+  const rangoX = `${n2(Math.min(...xs))} – ${n2(Math.max(...xs))}`;
+  intR.innerHTML =
+    `<strong>¿Cómo se interpreta?</strong> La ecuación estimada es <b>Ŷ = ${n3(b0)} + ${n3(b1)}·X</b>, donde X es «${esc(VARS[kx].label)}» e Y es «${esc(VARS[ky].label)}».
+     La <b>pendiente</b> b₁ = ${n4(b1)} indica que, por cada unidad adicional de X, se espera un cambio promedio de ${n4(b1)} unidades en Y ${b1 >= 0 ? '(aumento)' : '(disminución)'}.
+     El <b>intercepto</b> b₀ = ${n4(b0)} es el valor esperado de Y cuando X = 0; ${Math.min(...xs) > 0 ? 'como X = 0 queda fuera del rango observado (' + rangoX + '), esta interpretación es solo matemática y no debe usarse sustantivamente.' : 'debe interpretarse con cautela porque X = 0 puede no tener sentido real.'}
+     El <b>R² = ${n4(r2)}</b> indica que el modelo explica el ${n1(r2*100)} % de la variabilidad de Y; el ${n1(100 - r2*100)} % restante depende de otras variables no incluidas.
+     La columna de <b>residuos</b> (Y observada − Ŷ) muestra el error de predicción para cada caso: cuanto más cercanos a 0, mejor se ajusta la recta a ese individuo en particular.
+     <br><br><b>Predicciones prudentes:</b> solo conviene predecir dentro del rango observado de X (${rangoX}). Fuera de ese intervalo la relación puede cambiar y el modelo deja de ser confiable. Además, la recta describe una tendencia promedio, no el comportamiento de cada persona.`;
+}
+
+function renderPruebas(){
+  renderChi();
+  renderCorrYReg();
+}
+
+/* ---------- 6.7 Gráficos ---------- */
+function renderGraficos(){
+  // Barras
+  const kb = document.getElementById('selBarra').value;
+  const fb = tablaFrecuenciaCual(kb);
+  drawBar(document.getElementById('cvBarra'), fb.map(f=>f.cat), fb.map(f=>f.fa),
+          'Frecuencia absoluta · ' + VARS[kb].label);
+  const topB = fb.length ? fb.reduce((a,b)=> b.fa>a.fa?b:a) : null;
+  document.getElementById('capBarra').innerHTML = topB
+    ? `Gráfico de barras de <b>${esc(VARS[kb].label)}</b>. La barra más alta corresponde a <b>${esc(topB.cat)}</b> con ${topB.fa} casos (${n1(topB.pct)} % de ${DATA.length}). Las alturas son frecuencias absolutas; la categoría con mayor barra es la moda de la distribución.`
+    : 'Sin datos disponibles.';
+
+  // Pastel
+  const kp = document.getElementById('selPastel').value;
+  const fp = tablaFrecuenciaCual(kp);
+  drawPie(document.getElementById('cvPastel'), fp.map(f=>f.cat), fp.map(f=>f.fa),
+          'Distribución porcentual · ' + VARS[kp].label);
+  document.getElementById('capPastel').innerHTML = fp.length
+    ? `Gráfico circular de <b>${esc(VARS[kp].label)}</b>. Cada sector representa la proporción de casos en esa categoría sobre el total (${DATA.length} registros). Es adecuado porque las categorías son mutuamente excluyentes y suman el 100 %. La categoría <b>${esc(fp[0].cat)}</b> concentra el ${n1(fp[0].pct)} % de los casos.`
+    : 'Sin datos disponibles.';
+
+  // Histograma
+  const kh = document.getElementById('selHist').value;
+  const gh = tablaAgrupada(kh, 0);
+  if(gh){
+    drawHistogram(document.getElementById('cvHist'), gh.filas,
+      'Histograma · ' + VARS[kh].label, VARS[kh].label);
+    const maxI = gh.filas.reduce((a,b)=> b.fa>a.fa?b:a, gh.filas[0]);
+    document.getElementById('capHist').innerHTML =
+      `Histograma de <b>${esc(VARS[kh].label)}</b> en ${gh.K} intervalos de amplitud ${n2(gh.amp)} (regla de Sturges para n = ${gh.n}). El intervalo modal es <b>${esc(maxI.label)}</b> con ${maxI.fa} casos. La forma del histograma permite evaluar simetría y concentración: ${Math.abs(mean(gh.vals) - percentile(sortedNum(gh.vals),50)) < 0.15*(sdS(gh.vals)||1) ? 'la distribución se ve aproximadamente simétrica' : 'se aprecia cierta asimetría'}.`;
+  } else {
+    drawHistogram(document.getElementById('cvHist'), [], 'Histograma', '');
+    document.getElementById('capHist').textContent = 'Sin datos disponibles.';
+  }
+
+  // Polígono
+  const kl = document.getElementById('selPoli').value;
+  const gl = tablaAgrupada(kl, 0);
+  if(gl){
+    drawPolygon(document.getElementById('cvPoli'), gl.filas,
+      'Polígono de frecuencias · ' + VARS[kl].label, VARS[kl].label);
+    document.getElementById('capPoli').innerHTML =
+      `Polígono de frecuencias de <b>${esc(VARS[kl].label)}</b>, construido uniendo las marcas de clase con sus frecuencias absolutas. Es la versión lineal del histograma: permite ver el “perfil” de la distribución y comparar dos distribuciones con distinto número de intervalos. El máximo se alcanza en la marca de clase de <b>${esc(gl.filas.reduce((a,b)=> b.fa>a.fa?b:a, gl.filas[0]).label)}</b>.`;
+  } else {
+    drawPolygon(document.getElementById('cvPoli'), [], 'Polígono de frecuencias', '');
+    document.getElementById('capPoli').textContent = 'Sin datos disponibles.';
+  }
+
+  // Dispersión + regresión
+  const sx = document.getElementById('selScatX').value;
+  const sy = document.getElementById('selScatY').value;
+  const pares = DATA.map(r => [Number(r[sx]), Number(r[sy])])
+                    .filter(p => isFinite(p[0]) && isFinite(p[1]));
+  const xs = pares.map(p=>p[0]);
+  const ys = pares.map(p=>p[1]);
+  const res = (sx !== sy) ? analizarCorrelacion(xs, ys) : {error:'Selecciona variables distintas'};
+
+  if(!res.error){
+    drawScatter(document.getElementById('cvScat'), xs, ys, res.b0, res.b1,
+      VARS[sx].label, VARS[sy].label,
+      'Dispersión y recta de regresión · ' + VARS[sx].label + ' → ' + VARS[sy].label);
+    const it = interpretarR(res.r);
+    document.getElementById('capScat').innerHTML =
+      `Diagrama de dispersión de <b>${esc(VARS[sx].label)}</b> (eje X) frente a <b>${esc(VARS[sy].label)}</b> (eje Y), con n = ${res.n} pares válidos. La línea roja punteada es la recta de mínimos cuadrados: Ŷ = ${n3(res.b0)} + ${n3(res.b1)}·X. La nube de puntos muestra una relación ${it.dir} de intensidad ${it.inten} (r = ${n4(res.r)}, R² = ${n4(res.r2)}). Cuanto más cerca estén los puntos de la recta, mayor es el R² y mejor explica X el comportamiento de Y.`;
+  } else {
+    drawScatter(document.getElementById('cvScat'), xs, ys, NaN, NaN,
+      VARS[sx].label, VARS[sy].label, 'Dispersión');
+    document.getElementById('capScat').textContent = res.error;
+  }
+}
+
+/* =========================================================
+   7. ACTUALIZACIÓN GLOBAL
+   ========================================================= */
+function actualizarTodo(){
+  renderKPIs();
+  renderTabla();
+  renderFrecuencias();
+  renderDescriptiva();
+  renderPruebas();
+  renderGraficos();
+  actualizarOpcionesFiltros();
+}
+
+/* =========================================================
+   8. CSV, IMPRESIÓN, FORMULARIO
+   ========================================================= */
+function descargarCSV(){
+  if(!DATA.length){ alert('No hay datos para descargar.'); return; }
+  const sep = ';';
+  const head = COLS.map(k=>VARS[k].label).join(sep);
+  const body = DATA.map(r=>COLS.map(k=>{
+    let v = r[k];
+    if(typeof v === 'string' && v.includes(sep)) v = '"' + v + '"';
+    return v;
+  }).join(sep)).join('\n');
+  const csv = '\uFEFF' + head + '\n' + body;
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'datos_ia_rendimiento_academico.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url), 1500);
+}
+
+function llenarSelect(sel, arr){
+  if(!sel) return;
+  sel.innerHTML = arr.map(v=>`<option value="${esc(v)}">${esc(v)}</option>`).join('');
+}
+
+function actualizarOpcionesFiltros(){
+  const fc = document.getElementById('filtroCarrera');
+  const fp = document.getElementById('filtroPercepcion');
+  const vc = fc.value, vp = fp.value;
+  fc.innerHTML = '<option value="">Todas</option>' + CARRERAS.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('');
+  fp.innerHTML = '<option value="">Todas</option>' + PERCEPCIONES.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('');
+  fc.value = vc; fp.value = vp;
+}
+
+function inicializarSelects(){
+  // Cuestionario → filtros
+  llenarSelect(document.getElementById('f_sexo'), SEXOS);
+  llenarSelect(document.getElementById('f_carrera'), CARRERAS);
+  llenarSelect(document.getElementById('f_frecuenciaIA'), FRECUENCIAS);
+  llenarSelect(document.getElementById('f_herramienta'), HERRAMIENTAS);
+  llenarSelect(document.getElementById('f_proposito'), PROPOSITOS);
+  llenarSelect(document.getElementById('f_confianza'), ESCALA5);
+  llenarSelect(document.getElementById('f_percepcion'), PERCEPCIONES);
+  llenarSelect(document.getElementById('f_usoEtico'), ETICA);
+  llenarSelect(document.getElementById('f_satisfaccion'), ESCALA5);
+
+  // Frecuencias
+  llenarSelect(document.getElementById('selFrecCual'), CAT_VARS);
+  llenarSelect(document.getElementById('selFrecCuant'), QUANT_VARS);
+
+  // Descriptiva
+  llenarSelect(document.getElementById('selDesc'), QUANT_VARS);
+
+  // Chi-cuadrado
+  llenarSelect(document.getElementById('selChi1'), CAT_VARS);
+  llenarSelect(document.getElementById('selChi2'), CAT_VARS);
+  document.getElementById('selChi1').value = 'frecuenciaIA';
+  document.getElementById('selChi2').value = 'percepcion';
+
+  // Correlación / regresión
+  llenarSelect(document.getElementById('selCorrX'), QUANT_VARS);
+  llenarSelect(document.getElementById('selCorrY'), QUANT_VARS);
+  document.getElementById('selCorrX').value = 'horasIA';
+  document.getElementById('selCorrY').value = 'promedio';
+
+  // Gráficos
+  llenarSelect(document.getElementById('selBarra'), CAT_VARS);
+  llenarSelect(document.getElementById('selPastel'), CAT_VARS);
+  llenarSelect(document.getElementById('selHist'), QUANT_VARS);
+  llenarSelect(document.getElementById('selPoli'), QUANT_VARS);
+  llenarSelect(document.getElementById('selScatX'), QUANT_VARS);
+  llenarSelect(document.getElementById('selScatY'), QUANT_VARS);
+  document.getElementById('selBarra').value = 'herramienta';
+  document.getElementById('selPastel').value = 'percepcion';
+  document.getElementById('selHist').value = 'promedio';
+  document.getElementById('selPoli').value = 'promedio';
+  document.getElementById('selScatX').value = 'horasIA';
+  document.getElementById('selScatY').value = 'promedio';
+}
+
+/* =========================================================
+   9. EVENTOS E INICIALIZACIÓN
+   ========================================================= */
+function initEventos(){
+  // Navegación
+  document.querySelectorAll('#navLinks button').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('#navLinks button').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll('main section').forEach(s=>s.classList.remove('active'));
+      const target = document.getElementById(btn.dataset.target);
+      target.classList.add('active');
+      window.scrollTo({top:0, behavior:'smooth'});
+      if(btn.dataset.target === 'graficos'){
+        setTimeout(renderGraficos, 60);
+      }
+    });
+  });
+
+  // Filtros de la tabla
+  document.getElementById('filtroTexto').addEventListener('input', renderTabla);
+  document.getElementById('filtroCarrera').addEventListener('change', renderTabla);
+  document.getElementById('filtroPercepcion').addEventListener('change', renderTabla);
+  document.getElementById('btnLimpiarFiltros').addEventListener('click', ()=>{
+    document.getElementById('filtroTexto').value = '';
+    document.getElementById('filtroCarrera').value = '';
+    document.getElementById('filtroPercepcion').value = '';
+    renderTabla();
+  });
+
+  // Regenerar
+  document.getElementById('btnRegenerar').addEventListener('click', ()=>{
+    let n = parseInt(document.getElementById('inputN').value, 10);
+    if(!isFinite(n) || n < 10) n = 10;
+    if(n > 400) n = 400;
+    document.getElementById('inputN').value = n;
+    nextId = 1;
+    DATA = generarMuestra(n);
+    actualizarTodo();
+  });
+
+  // CSV
+  document.getElementById('btnDescargar').addEventListener('click', descargarCSV);
+
+  // Imprimir
+  document.getElementById('btnImprimir').addEventListener('click', ()=>window.print());
+
+  // Formulario
+  const form = document.getElementById('formNuevo');
+  document.getElementById('btnToggleForm').addEventListener('click', ()=>{
+    form.style.display = form.style.display === 'none' ? 'block' : 'none';
+  });
+  document.getElementById('btnCancelarForm').addEventListener('click', ()=>{
+    form.style.display = 'none';
+  });
+  document.getElementById('btnAgregar').addEventListener('click', ()=>{
+    const edad = parseInt(document.getElementById('f_edad').value, 10);
+    const horasIA = parseFloat(document.getElementById('f_horasIA').value);
+    const promedio = parseFloat(document.getElementById('f_promedio').value);
+    const horasEstudio = parseFloat(document.getElementById('f_horasEstudio').value);
+
+    if(!isFinite(edad) || edad < 10 || edad > 100){ alert('Ingresa una edad válida (10–100 años).'); return; }
+    if(!isFinite(horasIA) || horasIA < 0 || horasIA > 80){ alert('Ingresa horas de uso de IA válidas (0–80).'); return; }
+    if(!isFinite(promedio) || promedio < 0 || promedio > 20){ alert('El promedio debe estar entre 0 y 20.'); return; }
+    if(!isFinite(horasEstudio) || horasEstudio < 0 || horasEstudio > 80){ alert('Ingresa horas de estudio válidas (0–80).'); return; }
+
+    DATA.push({
+      id: nextId++,
+      edad,
+      sexo: document.getElementById('f_sexo').value,
+      carrera: document.getElementById('f_carrera').value,
+      horasIA,
+      frecuenciaIA: document.getElementById('f_frecuenciaIA').value,
+      herramienta: document.getElementById('f_herramienta').value,
+      proposito: document.getElementById('f_proposito').value,
+      confianza: Number(document.getElementById('f_confianza').value),
+      promedio,
+      horasEstudio,
+      percepcion: document.getElementById('f_percepcion').value,
+      usoEtico: document.getElementById('f_usoEtico').value,
+      satisfaccion: Number(document.getElementById('f_satisfaccion').value)
+    });
+    actualizarTodo();
+    form.style.display = 'none';
+  });
+
+  // Selects de frecuencias
+  document.getElementById('selFrecCual').addEventListener('change', renderFrecuencias);
+  document.getElementById('selFrecCuant').addEventListener('change', renderFrecuencias);
+  document.getElementById('inputK').addEventListener('input', renderFrecuencias);
+
+  // Descriptiva
+  document.getElementById('selDesc').addEventListener('change', renderDescriptiva);
+
+  // Pruebas
+  document.getElementById('selChi1').addEventListener('change', renderChi);
+  document.getElementById('selChi2').addEventListener('change', renderChi);
+  document.getElementById('selCorrX').addEventListener('change', renderCorrYReg);
+  document.getElementById('selCorrY').addEventListener('change', renderCorrYReg);
+
+  // Predicción
+  document.getElementById('btnPredecir').addEventListener('click', ()=>{
+    const kx = document.getElementById('selCorrX').value;
+    const ky = document.getElementById('selCorrY').value;
+    const pares = DATA.map(r => [Number(r[kx]), Number(r[ky])])
+                      .filter(p => isFinite(p[0]) && isFinite(p[1]));
+    const xs = pares.map(p=>p[0]);
+    const ys = pares.map(p=>p[1]);
+    const res = analizarCorrelacion(xs, ys);
+    const box = document.getElementById('boxPred');
+    box.style.display = 'block';
+
+    if(res.error){ box.innerHTML = `<span style="color:#A34640">${esc(res.error)}</span>`; return; }
+
+    const xv = parseFloat(document.getElementById('inputPred').value);
+    if(!isFinite(xv)){ box.innerHTML = '<span style="color:#A34640">Ingresa un valor numérico de X.</span>'; return; }
+
+    const yhat = res.b0 + res.b1*xv;
+    const xmin = Math.min(...xs), xmax = Math.max(...xs);
+    const fuera = xv < xmin || xv > xmax;
+
+    box.innerHTML = `
+      <div>Con X = <b>${n2(xv)}</b> (${esc(VARS[kx].label)}), el valor estimado es
+        <span class="big">Ŷ = ${n3(yhat)}</span> (${esc(VARS[ky].label)}).</div>
+      <div class="small" style="margin-top:.4rem">Cálculo: Ŷ = ${n3(res.b0)} + ${n3(res.b1)} × ${n2(xv)} = ${n3(yhat)}.</div>
+      ${fuera ? `<div class="warnbox" style="margin-top:.55rem"><strong>Precaución:</strong> el valor de X está fuera del rango observado (${n2(xmin)} – ${n2(xmax)}). Es una extrapolación y la predicción puede no ser válida.</div>`
+              : `<div class="note" style="margin-top:.55rem">El valor está dentro del rango observado (${n2(xmin)} – ${n2(xmax)}), por lo que la predicción es razonable. Recuerda que es un valor <i>promedio esperado</i>: un caso individual puede alejarse bastante.</div>`}`;
+  });
+
+  // Gráficos
+  ['selBarra','selPastel','selHist','selPoli','selScatX','selScatY'].forEach(id=>{
+    document.getElementById(id).addEventListener('change', renderGraficos);
+  });
+
+  // Redibujar al cambiar tamaño
+  let rt;
+  window.addEventListener('resize', ()=>{
+    clearTimeout(rt);
+    rt = setTimeout(()=>{
+      if(document.getElementById('graficos').classList.contains('active')) renderGraficos();
+    }, 220);
+  });
+}
+
+/* ---- Arranque ---- */
+(function iniciar(){
+  nextId = 1;
+  DATA = generarMuestra(45);
+  inicializarSelects();
+  renderCuestionario();
+  initEventos();
+  actualizarTodo();
+})();
+</script>
+</body>
+</html>
